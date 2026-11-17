@@ -1,16 +1,24 @@
 {
-  "name": "health-prototype-qa",
+  "name": "health",
   "version": "0.1.0",
   "private": true,
-  "description": "Synthetic-data-only browser tests for Health interactive prototype",
+  "description": "Health S1 local-only encrypted event/symptom Worker plus synthetic prototype QA",
   "type": "module",
   "scripts": {
     "test:prototype": "playwright test",
     "test:prototype:chromium": "playwright test --project=chromium",
     "test:db": "python3 -m unittest discover -s db/tests -p 'test_*.py'",
-    "check:js": "node --check prototype/v0.1/app.js"
+    "check:js": "node --check prototype/v0.1/app.js",
+    "dev:setup": "node scripts/setup-local-demo.mjs",
+    "dev:api": "wrangler dev --local --ip 127.0.0.1 --port 8787",
+    "db:migrate:local": "wrangler d1 migrations apply health-mvp-local --local",
+    "check:types": "tsc --noEmit",
+    "test:api": "node tests/mvp-api.test.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "^1.55.0"
+    "@playwright/test": "^1.55.0",
+    "wrangler": "^4.0.0",
+    "@cloudflare/workers-types": "^5.0.0",
+    "typescript": "^5.9.0"
   }
 }
