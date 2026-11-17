@@ -73,3 +73,14 @@
 - [架构实施 Epic #12](https://github.com/sunkai-hit/Health/issues/12)
 
 **研发阶段门：** 当前只有虚构数据原型、技术设计、数据库草案和自动化测试。尚未完成可存真实健康数据的 API、云端部署、合规评估、加密密钥管理或真实医学分诊。
+
+
+## 研发进展：S1 / S2（本地虚构数据）
+
+- [S1 PR #13](https://github.com/sunkai-hit/Health/pull/13)：本地 Worker + D1 健康事件/症状/时间线，41 项 CI 检查通过。
+- [S2 PR #15](https://github.com/sunkai-hit/Health/pull/15)：双虚构身份、短期签名演示令牌和事件/症状服务端归属隔离，53 项 CI 检查通过。
+- [S2 范围与不做事项](./docs/SPRINT-S2-BOUNDARY.md)
+- [S2 验收与问题收敛](./docs/SPRINT-S2-ACCEPTANCE.md)
+- [本地 API 运行说明](./src/mvp/README.md)
+
+**未合入 main，未公开部署。** A/B 演示令牌可由本地使用者任意申请，不是生产登录；仓库是 Public，禁止录入真实病历、患者信息和任何敏感数据。
