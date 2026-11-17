@@ -17,7 +17,7 @@
   let state = {
     events: [JSON.parse(JSON.stringify(example))],
     currentEventId: "demo-e1", view: "home", bodyView: "front",
-    zones: new Map(), unlocated: false, symptoms: new Set(), qaIndex: 0, qaAnswers: [],
+    zones: new Map(), activeZone: null, radiationFrom: "", radiationTo: "", unlocated: false, symptoms: new Set(), qaIndex: 0, qaAnswers: [],
     reportIncludeAI: false
   };
   const routes = {
@@ -25,6 +25,7 @@
     record: ["记录不适", "记录身体发出的信号", "选择部位、描述感受、留下发生时间。"],
     events: ["健康事件", "把零散信息，连接成一段清晰的经过", "从第一次不舒服，到用药和恢复变化。"],
     medication: ["用药记录", "实际服用了什么，记得清清楚楚", "坚持记录事实，避免自动猜测剂量和效果。"],
+    care: ["就医与医嘱", "把医生的要求和实际治疗记录清楚", "就诊、处方/医嘱、实际治疗分开登记，避免混淆。"],
     ai: ["AI 辅助", "更有条理地描述身体情况", "演示引导问询体验，未提供真实医学分诊。"],
     report: ["就医报告", "就医之前，把重要信息准备好", "可追溯的健康事件摘要与实际用药时间线。"]
   };
@@ -79,7 +80,7 @@
   function bodyMarkup(view, selected, interactive) {
     const shapes = (view === "front" ? zonesFront : zonesBack).map(function (z) {
       const key = view + ":" + z[0];
-      const active = selected.has(key);
+      const active = selected.has(key) || Array.from(selected.keys()).some(function (v) { return v.startsWith(key + "|"); });
       const accessible = interactive ? ' role="button" tabindex="0" data-zone="' + esc(key) + '" aria-pressed="' + active + '"' : "";
       return '<path class="body-zone' + (active ? ' selected' : '') + '" d="' + z[2] + '"' + accessible + '><title>' + esc(z[1]) + '</title></path>';
     }).join("");
@@ -121,6 +122,53 @@
     if (page === "ai") renderQA();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+  const zoneDetails = {
+    "front:head": ["前额", "头顶", "左太阳穴", "右太阳穴", "面部"],
+    "front:neck": ["颈前正中", "左颈侧", "右颈侧"],
+    "front:chest-right": ["右胸前", "右胸侧", "右胸骨旁"],
+    "front:chest-left": ["左胸前", "左胸侧", "左胸骨旁"],
+    "front:upper-abd": ["上腹正中", "左上腹", "右上腹"],
+    "front:navel": ["脐周正中", "脐周左侧", "脐周右侧"],
+    "front:lower-abd-left": ["左下腹靠近肚脐", "左下腹靠近髋部"],
+    "front:lower-abd-right": ["右下腹靠近肚脐", "右下腹靠近髋部"],
+    "back:head-back": ["后枕部", "左后脑", "右后脑"],
+    "back:upper-back-left": ["左肩胛骨区", "左肩胛骨内侧"],
+    "back:upper-back-right": ["右肩胛骨区", "右肩胛骨内侧"],
+    "back:lumbar-left": ["左腰", "左侧腰背"],
+    "back:lumbar-right": ["右腰", "右侧腰背"]
+  };
+  function zoneLabel(key) {
+    const [view, id] = key.split(":");
+    const z = (view === "back" ? zonesBack : zonesFront).find(function (v) { return v[0] === id; });
+    return z ? z[1] : key;
+  }
+  function renderZoneDetail() {
+    const target = $("zone-detail");
+    const key = state.activeZone;
+    if (!key) {
+      target.innerHTML = '<strong>点击人体区域，选择更具体的位置</strong><p>可选整体区域，或点击二级细分区域；未标记位置也能记录。</p>'; return;
+    }
+    const label = zoneLabel(key), subs = zoneDetails[key] || [];
+    target.innerHTML = '<strong>当前部位：' + esc(label) + '</strong><p>可直接使用整体区域；也可以选择一项或多项更细位置。</p>' +
+      '<div class="detail-options"><button type="button" class="detail-chip' + (state.zones.has(key) ? ' selected' : '') +
+      '" data-zone-detail="whole">整体：' + esc(label) + '</button>' +
+      subs.map(function (part,i) {
+        const id = key + "|" + i;
+        return '<button type="button" class="detail-chip' + (state.zones.has(id) ? ' selected' : '') +
+        '" data-zone-detail="' + i + '">' + esc(part) + '</button>';
+      }).join("") + '</div>';
+  }
+  function renderRadiation() {
+    const choices = Array.from(state.zones.entries());
+    const opts = '<option value="">未选择</option>' + choices.map(function (pair) { return '<option value="' + esc(pair[0]) + '">' + esc(pair[1]) + '</option>'; }).join("");
+    ["radiate-from","radiate-to"].forEach(function (name) {
+      const el = $(name);
+      const value = name === "radiate-from" ? state.radiationFrom : state.radiationTo;
+      el.innerHTML = opts; el.value = state.zones.has(value) ? value : "";
+    });
+    if (!state.zones.has(state.radiationFrom)) state.radiationFrom = "";
+    if (!state.zones.has(state.radiationTo)) state.radiationTo = "";
+  }
   function renderBody() {
     $("body-svg").innerHTML = bodyMarkup(state.bodyView, state.zones, true);
     $("body-side").textContent = state.bodyView === "front" ? "正面视图" : "背面视图";
@@ -131,6 +179,7 @@
       return '<button type="button" class="area-tag" data-remove-zone="' + esc(pair[0]) + '">' + esc(pair[1]) + ' ×</button>';
     }).join("") : '<span class="muted">' + (state.unlocated ? "已选择：全身 / 不明确位置" : "尚未选择，可直接填写症状") + '</span>';
     $("unlocated").classList.toggle("active", state.unlocated);
+    renderZoneDetail(); renderRadiation();
   }
   function renderChips() {
     document.querySelectorAll("#symptom-chips [data-symptom]").forEach(function (button) {
@@ -167,6 +216,7 @@
   function entryDescription(entry) {
     if (entry.kind === "med") return entry.notes || "实际用药记录（由用户确认）";
     return (entry.severity == null ? "不适程度未评分" : "不适程度 " + entry.severity + "/10") +
+      (entry.radiation ? " · 从" + entry.radiation.from + "延伸至" + entry.radiation.to : "") +
       (entry.notes ? " · " + entry.notes : "");
   }
   function renderEvents() {
@@ -245,6 +295,10 @@
     const symptoms = Array.from(state.symptoms), zones = Array.from(state.zones.entries()).map(function (pair) { return { key: pair[0], label: pair[1] }; });
     const notes = $("symptom-notes").value.trim(), severity = $("severity-unknown").checked ? null : Number($("severity").value);
     const when = $("symptom-onset").value || currentLocal();
+    const from = state.radiationFrom, to = state.radiationTo;
+    if ((from || to) && (!from || !to || from === to || !state.zones.has(from) || !state.zones.has(to))) {
+      notify("放射方向需选择两个不同且已标记的位置，或全部留空"); return;
+    }
     if (!symptoms.length && !zones.length && !notes && !state.unlocated) { notify("请至少选择部位、症状，或填写补充说明"); return; }
     const target = $("target-event").value;
     let e = target === "new" ? null : eventById(target);
@@ -255,9 +309,9 @@
       e = { id: "e-" + Date.now(), title: name.trim().slice(0, 60) || suggested, start: when, status: "进行中", entries: [] };
       state.events.push(e);
     }
-    e.entries.push({ id: "s-" + Date.now(), kind: "symptom", when: when, zones: zones, unlocated: state.unlocated, symptoms: symptoms, severity: severity, notes: notes });
+    e.entries.push({ id: "s-" + Date.now(), kind: "symptom", when: when, zones: zones, unlocated: state.unlocated, symptoms: symptoms, severity: severity, notes: notes, radiation: from && to ? {from:state.zones.get(from),to:state.zones.get(to)} : null });
     state.currentEventId = e.id;
-    state.symptoms.clear(); state.zones.clear(); state.unlocated = false;
+    state.symptoms.clear(); state.zones.clear(); state.unlocated = false; state.activeZone=null;state.radiationFrom="";state.radiationTo="";
     $("symptom-notes").value = ""; $("severity").value = 5; $("severity-unknown").checked = true; $("severity").disabled = true; $("severity-value").textContent = "未评分";
     renderEverything(); notify("已保存症状，并关联到健康事件"); go("events");
   }
@@ -301,7 +355,10 @@
       if (!shape) return;
       const key = shape.dataset.zone;
       const label = shape.querySelector("title").textContent;
-      if (state.zones.has(key)) state.zones.delete(key); else state.zones.set(key, label);
+      state.activeZone = key;
+      const matches = Array.from(state.zones.keys()).filter(function (v) { return v === key || v.startsWith(key + "|"); });
+      if (matches.length) matches.forEach(function (v) { state.zones.delete(v); });
+      else state.zones.set(key, label);
       state.unlocated = false;
       renderBody();
     });
@@ -313,8 +370,25 @@
     });
     $("switch-front").addEventListener("click", function () { state.bodyView = "front"; renderBody(); });
     $("switch-back").addEventListener("click", function () { state.bodyView = "back"; renderBody(); });
-    $("clear-areas").addEventListener("click", function () { state.zones.clear(); state.unlocated = false; renderBody(); });
-    $("unlocated").addEventListener("click", function () { state.unlocated = !state.unlocated; if (state.unlocated) state.zones.clear(); renderBody(); });
+    $("zone-detail").addEventListener("click", function (event) {
+      const btn = event.target.closest("[data-zone-detail]"); if (!btn || !state.activeZone) return;
+      const base = state.activeZone, code = btn.dataset.zoneDetail;
+      if (code === "whole") {
+        Array.from(state.zones.keys()).filter(function (v) { return v.startsWith(base+"|"); }).forEach(function(v){state.zones.delete(v);});
+        if (state.zones.has(base)) state.zones.delete(base); else state.zones.set(base, zoneLabel(base));
+      } else {
+        const key = base + "|" + code;
+        const detail = (zoneDetails[base] || [])[Number(code)];
+        if (!detail) return;
+        state.zones.delete(base);
+        if (state.zones.has(key)) state.zones.delete(key); else state.zones.set(key, detail);
+      }
+      state.unlocated = false; renderBody();
+    });
+    $("radiate-from").addEventListener("change", function(){state.radiationFrom=this.value;});
+    $("radiate-to").addEventListener("change", function(){state.radiationTo=this.value;});
+    $("clear-areas").addEventListener("click", function () { state.zones.clear(); state.activeZone=null; state.radiationFrom="";state.radiationTo=""; state.unlocated = false; renderBody(); });
+    $("unlocated").addEventListener("click", function () { state.unlocated = !state.unlocated; if (state.unlocated) {state.zones.clear();state.radiationFrom="";state.radiationTo="";state.activeZone=null;} renderBody(); });
     $("symptom-chips").addEventListener("click", function (event) {
       const btn = event.target.closest("[data-symptom]"); if (!btn) return;
       if (state.symptoms.has(btn.dataset.symptom)) state.symptoms.delete(btn.dataset.symptom); else state.symptoms.add(btn.dataset.symptom);
