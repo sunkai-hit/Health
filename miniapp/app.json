@@ -1,7 +1,8 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/timeline/timeline"
+    "pages/timeline/timeline",
+    "pages/dev-cloud/dev-cloud"
   ],
   "window": {
     "navigationBarTitleText": "Health · 健康记录",
