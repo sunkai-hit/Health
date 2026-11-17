@@ -71,3 +71,11 @@ GitHub Actions：[44040325917](https://github.com/sunkai-hit/Health/actions/runs
 这些要素未落实前不调用真实微信认证，也不允许真实用户输入任何健康数据。
 
 对应：[ADR](./ADR-0001-CHINA-WECHAT-LAUNCH.md) · [S4 范围](./SPRINT-S4-WECHAT-SCOPE.md) · [Draft PR #21](https://github.com/sunkai-hit/Health/pull/21)。
+
+
+## 2026-11-18 AppID 配置变更（原 S4 验收后的维护）
+
+- 用户已提供 AppID `wx027f1a9c66e3c01a`，本分支 `miniapp/project.config.json` 已替换此前的 `touristappid`。
+- 已更新小程序工程静态测试与导入文档，保留只读虚构数据、不联网、不登录的原有约束。
+- **这仅是用户提供的 AppID 的配置与格式检查；并未实际验证小程序主体、后台权限、备案、微信开发者工具编译或真机运行。**
+- 这一变更不使 AppSecret、`session_key` 或真实健康信息进入公开仓库。修改后的 CI 见 [GitHub Actions 44201751021](https://github.com/sunkai-hit/Health/actions/runs/44201751021)。
