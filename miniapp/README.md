@@ -39,3 +39,12 @@ miniapp/
 上线前仍须确认小程序主体与管理员权限、备案与类目资质、境内后端部署及域名、敏感个人信息告知与单独同意、KMS/加密及导出删除能力。
 
 详见 [首发架构决策](../docs/ADR-0001-CHINA-WECHAT-LAUNCH.md)、[S4 范围](../docs/SPRINT-S4-WECHAT-SCOPE.md)、[S4 验收](../docs/SPRINT-S4-ACCEPTANCE.md)。
+
+
+## S5 微信云开发可选联调（默认关闭）
+
+因为目前尚无自购服务器和自有 HTTPS 域名，小程序新增了**无需二者的微信·云开发测试入口**。导入小程序后首页会有「云开发连接测试（默认关闭）」按钮。项目仓库 \`config/cloud-env.js\` 默认为 \`enabled:false\`、\`envId:''\`，因此无测试云环境也能安全打开页面，而且不会联网。
+
+真正联通需要项目方自行开通并关联 CloudBase 测试环境后**在本地**配置环境 ID，手工部署 \`healthDevPing\`。此测试函数只返回合成状态，不读取 OpenID、不查库、不收集患者数据。具体步骤见 [CLOUDBASE-SETUP.md](./CLOUDBASE-SETUP.md)。
+
+**注意：无需自购服务器/域名不等于无需小程序备案、平台类目及敏感个人信息保护，当前不能处理真实医疗健康资料。**
