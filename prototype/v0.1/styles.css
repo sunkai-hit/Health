@@ -4,3 +4,24 @@
 @media(max-width:970px){.sidebar{width:78px;align-items:center;padding:24px 9px}.brand{margin:0 0 38px}.brand>div,.nav-kicker,.sidebar-bottom,.nav-item:not(.active){font-size:0}.brand-mark{width:46px;height:46px}.nav-item{width:56px;height:56px;justify-content:center;padding:0;font-size:0}.nav-item .nav-emoji{font-size:27px}.nav-list{width:100%;align-items:center}.workspace{padding:26px 22px 85px}.record-layout,.events-layout,.two-column-med{grid-template-columns:1fr}.body-card{max-width:none}.body-stage{min-height:430px}.two-column{grid-template-columns:1fr}.ai-layout{grid-template-columns:1fr}}
 @media(max-width:650px){.sidebar{display:none}.workspace{padding:23px 16px 110px}.topbar h1{font-size:22px}.topbar p{font-size:12px}.topbar .eyebrow{font-size:9px}.header-actions{padding-top:0}.avatar{display:none}.demo-pill{font-size:10px;padding:7px 9px}.notice{margin:18px 0 22px;padding:11px 12px}.hero{padding:29px 25px;min-height:280px}.hero h2{font-size:27px}.hero p{font-size:12px;max-width:275px}.hero-art{right:-30%;width:80%;opacity:.27}.pulse-a{width:160px}.pulse-b{width:250px}.pulse-c{width:350px}.stats{gap:9px}.stat{padding:15px}.stat strong{font-size:29px}.stat span,.stat small{font-size:11px}.roomy,.form-card,.body-card{padding:20px}.section-intro h2{font-size:22px}.record-layout{gap:13px}.body-stage{min-height:420px}.body-stage svg{height:410px}.event-list-card,.event-detail-card{padding:17px}.report-toolbar>div:first-child{width:100%}.report-toolbar .inline-check{margin:5px 0}.report-actions{width:100%}.report-actions .btn{flex:1;font-size:12px;padding:11px}.report-page{padding:27px 20px;min-height:400px}.report-section .timeline-row{grid-template-columns:110px 1fr;gap:7px}.report-title h2{font-size:20px}.mobile-nav{position:fixed;display:flex;bottom:0;left:0;right:0;background:#fffffff5;border-top:1px solid #dceae5;z-index:40;box-shadow:0 -5px 22px #204e4911;justify-content:space-around;padding:7px 0 max(8px,env(safe-area-inset-bottom))}.mobile-nav button{border:0;background:transparent;color:#8aa29b;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;min-width:57px;padding:3px}.mobile-nav button span{font-size:21px}.mobile-nav button.active{color:#177e78;font-weight:700}.toast{bottom:80px;right:15px;left:15px;text-align:center}.input-pair{grid-template-columns:1fr 96px}}
 @media print{body{background:white}.sidebar,.topbar,.notice,.mobile-nav,.section-intro,.report-toolbar,.report-disclaimer,.toast,.modal-backdrop{display:none!important}.workspace{padding:0;display:block}.screen{display:none!important}#screen-report{display:block!important}.app-shell{display:block}.report-page{border:0;box-shadow:none;max-width:none;min-height:0;padding:0}.report-section{break-inside:avoid}.report-title{break-after:avoid}@page{size:A4;margin:16mm}}
+/* V0.1 iteration: secondary body locations and care history. */
+.zone-detail{border:1px solid #cde6de;border-radius:13px;background:#f5fbf8;padding:14px;margin:12px 0 14px;line-height:1.65}
+.zone-detail strong{font-size:13px;color:#245e56}
+.zone-detail p{font-size:12px;color:#718e84;margin:7px 0 10px}
+.detail-options{display:flex;gap:7px;flex-wrap:wrap}
+.detail-chip{border:1px solid #c3ddd5;border-radius:30px;padding:7px 11px;background:#fff;color:#4b8078;font-size:12px}
+.detail-chip.selected{background:#157f75;color:#fff;border-color:#157f75}
+.radiation-field .input-pair{grid-template-columns:1fr 1fr}
+.care-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.care-tabs button{padding:11px 17px;background:#edf6f2;color:#4a7d74;border:1px solid #cee7df;border-radius:10px}
+.care-tabs button.active{background:#167c79;border-color:#167c79;color:#fff;font-weight:700}
+.care-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:start}
+.care-form{display:none}
+.care-form.active{display:block}
+.care-form h3{margin:20px 0;font-size:18px}
+.care-item-title{display:block;margin-top:12px}
+.report-page .report-section ul{padding-left:20px}
+.report-page .report-section li{margin-bottom:7px}
+@media(max-width:970px){.care-layout{grid-template-columns:1fr}}
+@media(max-width:650px){.care-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.care-tabs button{padding:10px 6px;font-size:11px}.radiation-field .input-pair{grid-template-columns:1fr 1fr;gap:7px}}
+@media print{.care-tabs{display:none!important}}
