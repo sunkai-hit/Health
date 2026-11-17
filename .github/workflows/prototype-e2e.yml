@@ -8,16 +8,25 @@ on:
       - 'db/**'
       - 'playwright.config.mjs'
       - 'package.json'
+      - 'src/**'
+      - 'scripts/**'
+      - 'wrangler.jsonc'
+      - 'tsconfig.json'
       - '.github/workflows/prototype-e2e.yml'
   push:
     branches:
       - 'docs/requirements-v0.1'
+      - 'feature/mvp-s1-core'
     paths:
       - 'prototype/**'
       - 'tests/**'
       - 'db/**'
       - 'playwright.config.mjs'
       - 'package.json'
+      - 'src/**'
+      - 'scripts/**'
+      - 'wrangler.jsonc'
+      - 'tsconfig.json'
       - '.github/workflows/prototype-e2e.yml'
   workflow_dispatch:
 
@@ -59,3 +68,24 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+
+  mvp-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install test and Worker dependencies
+        run: npm install --no-audit --no-fund
+      - name: TypeScript check for MVP API
+        run: npm run check:types
+      - name: Generate random local demo encryption key
+        run: npm run dev:setup
+      - name: Apply local D1 migrations
+        run: npm run db:migrate:local
+      - name: Start local Worker and exercise synthetic API
+        run: npm run test:api
