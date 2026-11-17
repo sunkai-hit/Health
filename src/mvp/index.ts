@@ -82,8 +82,7 @@ async function allEntries(db:D1Database,key:CryptoKey,eventId:string){
   }
   return Promise.all(((e.results||[]) as EntryRow[]).map(async row=>{
     const value=await decrypt<Omit<SymptomInput,'body_marks'>>(key,'symptom:'+row.id,row.payload_ciphertext);
-    return {id:row.id,kind:row.entry_type,occurred_at:row.occurred_at,
-      occurred_precision:row.occurred_precision,source_type:row.source_type,
+    return {id:row.id,kind:row.entry_type,source_type:row.source_type,
       created_at:row.created_at,...value,body_marks:markMap.get(row.id)||[]};
   }));
 }
