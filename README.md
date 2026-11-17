@@ -60,3 +60,16 @@
 - 已加入多药处方明细、医嘱版本替代、实际用药药品项关联、复诊计划和对照视图。
 - 原型中图片仅本地预览，不上传、不 OCR，也不会保存真实患者数据。
 - 仍处于 Draft PR 评审阶段，未合入 main。
+
+
+## 工程基线与自动化验收（2026-11-17）
+
+- [技术架构 V0.1](./docs/TECH-ARCHITECTURE-V0.1.md)：部署可替换的 PWA/API/关系数据库/私有附件架构
+- [API 契约](./docs/API-CONTRACT-V0.1.md)：健康事件、医嘱、实际用药、治疗、复诊、报告设计
+- [安全与隐私设计](./docs/SECURITY-PRIVACY-V0.1.md)：授权、越权校验、加密、AI/OCR 数据治理
+- [SQLite 初始迁移草案](./db/migrations/0001_initial.sql)
+- [CI 实测结果](./docs/QA-RESULTS-2026-11-17.md)：桌面/模拟移动浏览器 18/18 通过，SQLite 8/8 通过
+- [GitHub Actions](./.github/workflows/prototype-e2e.yml)：PR 自动运行原型测试及数据库基本检查
+- [架构实施 Epic #12](https://github.com/sunkai-hit/Health/issues/12)
+
+**研发阶段门：** 当前只有虚构数据原型、技术设计、数据库草案和自动化测试。尚未完成可存真实健康数据的 API、云端部署、合规评估、加密密钥管理或真实医学分诊。
