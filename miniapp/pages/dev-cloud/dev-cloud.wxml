@@ -1,0 +1,15 @@
+<view class="container">
+  <view class="hero">
+    <view class="title">云开发联调</view>
+    <view class="subtitle">没有独立服务器和 HTTPS 域名，也能验证微信小程序与云函数的调用通路。</view>
+  </view>
+  <view class="notice">仅供虚构数据测试。这里不提供微信用户身份、健康事件存储、病历上传、处方和 AI 能力。</view>
+  <view class="card">
+    <view class="card-title">CloudBase 测试环境</view>
+    <view class="paragraph">{{message}}</view>
+    <button class="primary" type="primary" disabled="{{!available || loading}}" loading="{{loading}}" bindtap="runPing">
+      验证云函数连接
+    </button>
+    <view class="muted" style="margin-top:24rpx;">只有先在微信开发者工具开通并关联测试环境、配置环境 ID，按钮才会启用。</view>
+  </view>
+</view>
