@@ -1,6 +1,6 @@
 {
   "compileType": "miniprogram",
-  "appid": "touristappid",
+  "appid": "wx027f1a9c66e3c01a",
   "projectname": "Health-S4-synthetic-only",
   "setting": {
     "es6": true,
@@ -8,5 +8,5 @@
     "postcss": true,
     "urlCheck": true
   },
-  "description": "Synthetic read-only development shell only. Set a legitimate AppID locally before future real-device preview."
+  "description": "User-supplied WeChat Mini Program AppID; synthetic read-only shell. This does NOT verify ownership or enable login."
 }
