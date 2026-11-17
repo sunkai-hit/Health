@@ -1,17 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "health-mvp-s1-local",
-  "main": "src/mvp/index.ts",
+  "name": "health-release-blocked",
+  "main": "src/release-gate/index.ts",
   "compatibility_date": "2026-11-01",
   "workers_dev": false,
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "health-mvp-local",
-      "database_id": "00000000-0000-4000-8000-000000000001",
-      "migrations_dir": "db/migrations"
-    }
-  ],
   "observability": {
     "enabled": false
   }

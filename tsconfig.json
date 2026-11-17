@@ -17,6 +17,8 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "src/mvp/**/*.ts"
+    "src/mvp/**/*.ts",
+    "src/auth/**/*.ts",
+    "src/release-gate/**/*.ts"
   ]
 }

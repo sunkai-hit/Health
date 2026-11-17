@@ -94,3 +94,13 @@
 - 发现并修复快速身份切换的过期请求覆盖当前界面问题；不引入新业务范围
 
 **警告：** 演示账号不是真实身份认证，仍然不能保存真实健康资料或公开部署。
+
+
+## Sprint S3｜默认禁止发布与正式身份接入契约（2026-11-17）
+
+- [Draft PR #19](https://github.com/sunkai-hit/Health/pull/19) · [S3 范围](./docs/SPRINT-S3-AUTH-BOUNDARY.md) · [S3 验收记录](./docs/SPRINT-S3-ACCEPTANCE.md)
+- **默认 \`wrangler.jsonc\` 是禁止业务发布的安全入口**：不绑定虚构健康数据存储；所有路径统一 503 \`RELEASE_BLOCKED\`。
+- 原 A/B 虚构身份 Worker 已移至 \`wrangler.local.jsonc\`。通过 \`npm run dev:setup && npm run db:migrate:local && npm run dev:api\` 启动本地合成数据服务。
+- 已新增供应商无关的 OIDC/BFF 身份契约及安全配置校验；**没有真实登录、授权回调、用户会话或生产数据处理能力**。
+- [CI 运行 44038625299](https://github.com/sunkai-hit/Health/actions/runs/44038625299)：OIDC 策略16、默认拒绝 HTTP7、API27、SQLite8、原型18、S2 真实联调页12，**88 项检查全部通过，五作业成功**。
+- 正式身份供应商、目标地区、隐私授权、KMS/密钥轮换等仍是发布前置条件；禁止把演示身份用于真实患者资料。

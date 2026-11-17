@@ -122,3 +122,12 @@
 - 最小修复后 CI [44025858347](https://github.com/sunkai-hit/Health/actions/runs/44025858347) 四作业均成功：12 新 UI + 27 API + 8 数据库 + 18 旧原型 = **65 项全部通过**。
 - 详见 [S2 浏览器验收报告](./SPRINT-S2-BROWSER-QA-RESULTS.md)。
 - **下阶段仍需先完成真实账号/目标地区/生产数据保护方案决策。** 本地任意领取 A/B 演示令牌不代表实现了真正的用户身份认证。
+
+
+## Sprint S3 身份接入边界与发布闸门（2026-11-17）
+
+- 独立 Draft PR #19：默认 Wrangler 配置改为全部拒绝的 release gate；A/B 虚构身份保留独立本地配置。防止默认构建误包含测试用户或本地 D1。
+- 已建立供应商中立的 OIDC 授权码 + PKCE S256 + BFF 认证契约和配置负面测试；不实现真实登录。
+- 实际 CI [44038625299](https://github.com/sunkai-hit/Health/actions/runs/44038625299) 五项作业成功：16 OIDC 策略 + 7 release gate HTTP + 27 S2 API + 8 SQLite + 18 旧版原型 + 12 本地 Worker UI = **88/88**。
+- 验收和风险收敛见 \`docs/SPRINT-S3-ACCEPTANCE.md\`。
+- 下一阶段**仍需先决定目标服务地区、首发登录方式及正式身份服务选型**；不跳过 KMS/同意/删除/会话安全阶段门，不提前开发处方/AI/OCR。

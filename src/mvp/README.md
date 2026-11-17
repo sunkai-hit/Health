@@ -65,3 +65,13 @@ npm run test:dev-ui
 此命令用专用 \`playwright.mvp.config.mjs\` 自动启动本地 Worker，真实连接本地 D1，按桌面与 390px 移动模拟视口分别运行六类场景，检查 A/B 切换、事件/症状归属、刷新、输入显示及异步切换竞态。无需预先运行 \`npm run dev:api\`；不要把测试服务暴露到局域网或公网上。
 
 最新已通过 [CI 44025858347](https://github.com/sunkai-hit/Health/actions/runs/44025858347)，详细见 [问题收敛记录](../../docs/SPRINT-S2-BROWSER-QA-RESULTS.md)。仍非真实设备、真实身份认证或生产数据安全验收。
+
+
+## S3 安全调整：默认 Worker 不再是演示环境
+
+- 默认 \`wrangler.jsonc\` 只指向阻断入口：所有请求返回 503，不绑定 D1、不提供 A/B 演示 API。
+- 虚构用户 A/B 的原本联调服务保存在显式的 \`wrangler.local.jsonc\`；上述 \`npm run dev:api\`、\`npm run db:migrate:local\` 命令已经自动使用该本地配置。
+- 可以运行 \`npm run test:release-guard\` 检查默认 Worker 实际 HTTP 503，运行 \`npm run test:auth-policy\` 检查未来 OIDC 配置负面案例。
+- **默认阻断入口不是可上线的真实 Health 服务**；不能因构建和测试通过而存储患者数据或运行 \`wrangler deploy\`。
+
+[S3 身份与发布边界](../../docs/SPRINT-S3-AUTH-BOUNDARY.md) · [S3 验收报告](../../docs/SPRINT-S3-ACCEPTANCE.md)
