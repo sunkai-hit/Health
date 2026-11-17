@@ -17,9 +17,10 @@ test('native two-page Mini Program routes have WXML/WXSS/JS/JSON files',()=>{
     JSON.parse(read(route+'.json'));
   }
 });
-test('project contains a deliberately nonproduction tourist AppID',()=>{
+test('Mini Program project uses the user-provided AppID (format only, not ownership verified)',()=>{
   assert.equal(project.compileType,'miniprogram');
-  assert.equal(project.appid,'touristappid');
+  assert.equal(project.appid,'wx027f1a9c66e3c01a');
+  assert.match(project.appid,/^wx[0-9a-fA-F]{16}$/);
   assert.equal(project.setting.urlCheck,true);
 });
 test('native pages use WXML and do not embed an insecure web-view wrapper',()=>{
