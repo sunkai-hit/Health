@@ -2,7 +2,7 @@
   "name": "health",
   "version": "0.1.0",
   "private": true,
-  "description": "Health S1 local-only encrypted event/symptom Worker plus synthetic prototype QA",
+  "description": "Health local-only synthetic MVP API with fail-closed release gate",
   "type": "module",
   "scripts": {
     "test:prototype": "playwright test",
@@ -10,16 +10,20 @@
     "test:db": "python3 -m unittest discover -s db/tests -p 'test_*.py'",
     "check:js": "node --check prototype/v0.1/app.js",
     "dev:setup": "node scripts/setup-local-demo.mjs",
-    "dev:api": "wrangler dev --local --ip 127.0.0.1 --port 8787",
-    "db:migrate:local": "wrangler d1 migrations apply health-mvp-local --local",
+    "dev:api": "wrangler dev --config wrangler.local.jsonc --local --ip 127.0.0.1 --port 8787",
+    "db:migrate:local": "wrangler d1 migrations apply health-mvp-local --config wrangler.local.jsonc --local",
     "check:types": "tsc --noEmit",
     "test:api": "node tests/mvp-api.test.mjs",
-    "test:dev-ui": "playwright test --config=playwright.mvp.config.mjs"
+    "test:dev-ui": "playwright test --config=playwright.mvp.config.mjs",
+    "test:release-guard": "node tests/release-guard.test.mjs",
+    "test:auth-policy": "tsx --test tests/auth-policy.test.ts",
+    "check:release-bundle": "wrangler deploy --dry-run --config wrangler.jsonc --outdir .tmp/release-gate-build"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
     "wrangler": "^4.0.0",
     "@cloudflare/workers-types": "^5.0.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "tsx": "^4.20.0"
   }
 }
