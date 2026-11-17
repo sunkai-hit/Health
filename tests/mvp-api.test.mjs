@@ -4,21 +4,39 @@
 import { spawn } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { createHmac } from 'node:crypto';
 
 const BASE='http://127.0.0.1:8787';
 let output='';
+let currentToken=null;
 const child=spawn('npm',['run','dev:api'],{
   stdio:['ignore','pipe','pipe'],detached:process.platform!=='win32',env:process.env
 });
 for(const stream of [child.stdout,child.stderr]){
   stream.on('data',part=>{output+=part.toString();if(output.length>30000)output=output.slice(-30000);});
 }
-async function api(path,method='GET',value=undefined){
+async function api(path,method='GET',value=undefined,token=currentToken){
+  const headers={};
+  if(value!==undefined)headers['content-type']='application/json';
+  if(token)headers.authorization='Bearer '+token;
   const res=await fetch(BASE+path,{
-    method,headers:value===undefined?{}:{'content-type':'application/json'},
-    body:value===undefined?undefined:JSON.stringify(value)
+    method,headers,body:value===undefined?undefined:JSON.stringify(value)
   });
   return {status:res.status,data:await res.json()};
+}
+function fakeToken(overrides={}){
+  // Offline negative test only; reads the random local signing key; never prints it.
+  const config=readFileSync('.dev.vars','utf8');
+  const secret=config.match(/^DEMO_AUTH_SECRET_BASE64=(.+)$/m)?.[1];
+  assert.ok(secret,'missing demo auth secret');
+  const now=Math.floor(Date.now()/1000);
+  const claim={iss:'health-local-s2',aud:'health-local-demo-api',sub:'alice',
+    iat:now-3600,exp:now-2700,jti:'synthetic-negative-check',...overrides};
+  const payload=Buffer.from(JSON.stringify(claim)).toString('base64url');
+  const unsigned='s2d.'+payload;
+  const sig=createHmac('sha256',Buffer.from(secret,'base64')).update(unsigned).digest('base64url');
+  return unsigned+'.'+sig;
 }
 async function waitForServer(){
   for(let i=0;i<100;i++){
@@ -38,6 +56,26 @@ async function run(){
   const health=await api('/api/v1/health');
   assert.equal(health.data.mode,'synthetic-local-demo');
   assert.equal(health.data.medical_analysis,false);ok('explicit local-only mode');
+  const noToken=await api('/api/v1/events','GET',undefined,null);
+  assert.equal(noToken.status,401);ok('health events reject missing bearer token');
+  const badPersona=await api('/api/v1/dev/session','POST',{persona:'admin'},null);
+  assert.equal(badPersona.status,422);ok('unknown demo identity rejected');
+  const sessionA=await api('/api/v1/dev/session','POST',{persona:'alice'},null);
+  const sessionB=await api('/api/v1/dev/session','POST',{persona:'bob'},null);
+  assert.equal(sessionA.status,200);assert.equal(sessionB.status,200);
+  assert.notEqual(sessionA.data.access_token,sessionB.data.access_token);
+  assert.equal(sessionA.data.expires_in,900);
+  const tokenA=sessionA.data.access_token,tokenB=sessionB.data.access_token;
+  currentToken=tokenA;
+  const identity=await api('/api/v1/me');
+  assert.equal(identity.data.persona,'alice');ok('signed synthetic persona issued and verified');
+  const tampered=tokenA.slice(0,-4)+'xxxx';
+  const rejected=await api('/api/v1/events','GET',undefined,tampered);
+  assert.equal(rejected.status,401);ok('tampered demo signature rejected');
+  const expired=await api('/api/v1/events','GET',undefined,fakeToken());
+  assert.equal(expired.status,401);ok('expired signed token rejected');
+  const badAudience=await api('/api/v1/events','GET',undefined,fakeToken({iat:Math.floor(Date.now()/1000)-10,exp:Math.floor(Date.now()/1000)+890,aud:'other'}));
+  assert.equal(badAudience.status,401);ok('incorrect audience rejected');
 
   const empty=await api('/api/v1/events','POST',{title:' ',onset_at:null});
   assert.equal(empty.status,422);ok('empty title rejected');
@@ -55,6 +93,18 @@ async function run(){
   const list=await api('/api/v1/events');
   assert.equal(list.status,200);
   assert.ok(list.data.items.some(e=>e.id===id&&e.title===unique));ok('event persisted and listed from D1');
+  const bList=await api('/api/v1/events','GET',undefined,tokenB);
+  assert.equal(bList.status,200);
+  assert.ok(!bList.data.items.some(e=>e.id===id));ok('user B cannot list user A events');
+  const bDetail=await api('/api/v1/events/'+id,'GET',undefined,tokenB);
+  assert.equal(bDetail.status,404);ok('user B cannot access user A event by ID');
+  const bEntries=await api('/api/v1/events/'+id+'/entries','GET',undefined,tokenB);
+  assert.equal(bEntries.status,404);ok('user B cannot read user A symptom list');
+  const bEvent=await api('/api/v1/events','POST',{title:'虚构B的独立事件',onset_at:null,onset_precision:'unknown'},tokenB);
+  assert.equal(bEvent.status,201);
+  const bId=bEvent.data.item.id;
+  const another=await api('/api/v1/events','GET',undefined,tokenA);
+  assert.ok(!another.data.items.some(e=>e.id===bId));ok('user A cannot list user B events');
 
   const noSuch=await api('/api/v1/events/00000000-0000-4000-8000-000000000001');
   assert.equal(noSuch.status,404);ok('unknown event does not leak data');
@@ -71,6 +121,10 @@ async function run(){
   };
   const symptom=await api('/api/v1/events/'+id+'/entries','POST',input);
   assert.equal(symptom.status,201);ok('symptom created independently of AI');
+  const crossWrite=await api('/api/v1/events/'+id+'/entries','POST',input,tokenB);
+  assert.equal(crossWrite.status,404);ok('user B cannot append to user A symptom timeline');
+  const wrongProfile=await api('/api/v1/events/'+bId+'/entries','POST',input,tokenA);
+  assert.equal(wrongProfile.status,404);ok('user A cannot append to user B timeline');
 
   const detail=await api('/api/v1/events/'+id);
   assert.equal(detail.status,200);
@@ -107,9 +161,9 @@ async function run(){
 
   const ui=await fetch(BASE+'/demo');
   assert.equal(ui.status,200);
-  assert.match(await ui.text(),/S1 核心研发联调/);ok('same-origin API integration page loads');
+  assert.match(await ui.text(),/S2 数据权限联调/);ok('same-origin synthetic persona switcher loads');
 
-  console.log('PASS: '+count+' checks, local synthetic data only.');
+  console.log('PASS: '+count+' checks, two synthetic identities; no production authentication.');
 }
 try{
   await run();
