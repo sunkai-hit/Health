@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <title>Health · 个人健康记录助手 V0.1 交互原型</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="brand"><span class="brand-mark">✳</span><div><strong>Health</strong><small>健康记录助手</small></div></div>
+      <p class="nav-kicker">我的健康空间</p>
+      <nav class="nav-list" id="desktop-nav">
+        <button class="nav-item active" data-nav="home"><span class="nav-emoji">⌂</span> 首页概览</button>
+        <button class="nav-item" data-nav="record"><span class="nav-emoji">◎</span> 记录不适</button>
+        <button class="nav-item" data-nav="events"><span class="nav-emoji">☷</span> 健康事件</button>
+        <button class="nav-item" data-nav="medication"><span class="nav-emoji">✚</span> 用药记录</button>
+        <button class="nav-item" data-nav="ai"><span class="nav-emoji">✧</span> AI 辅助</button>
+        <button class="nav-item" data-nav="report"><span class="nav-emoji">▤</span> 就医报告</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="sidebar-tip"><strong>原型演示模式</strong><p>本页仅使用虚构示例与内存数据，不连接医疗 AI 或服务器。</p></div>
+        <small>V0.1 · 需求评审稿</small>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div class="topbar-titles"><div class="eyebrow">个人健康空间 / <span id="crumb">首页概览</span></div><h1 id="page-title">让每一次身体变化，都有迹可循</h1><p id="page-subtitle">记录当下的不适，为下一次就医留下清楚的线索。</p></div>
+        <div class="header-actions"><span class="demo-pill"><span class="demo-dot"></span>仅供原型测试</span><span class="avatar" title="虚构档案">H</span></div>
+      </header>
+      <div class="notice" role="note"><span>ⓘ</span><div><strong>原型与隐私提示</strong>：当前为离线交互演示，信息仅保存在当前页面内存中，刷新即重置。请勿输入真实病历或个人敏感资料；AI 页面不提供实际诊断或分诊。</div></div>
+
+      <section class="screen active" id="screen-home" aria-labelledby="home-heading">
+        <div class="hero">
+          <div class="hero-content"><span class="hero-overline">HEALTH JOURNAL · V0.1</span><h2 id="home-heading">身体的小变化<br>值得被认真记录。</h2><p>不必每天打卡。不舒服时随手记下，后续用药、观察和就医都可以接着补充。</p><button class="btn btn-white" data-nav="record">＋ 开始记录不适 <span aria-hidden="true">↗</span></button></div>
+          <div class="hero-art" aria-hidden="true"><div class="pulse pulse-a"></div><div class="pulse pulse-b"></div><div class="pulse pulse-c"></div><div class="pulse-heart">♥</div></div>
+        </div>
+        <div class="stats">
+          <div class="stat card"><span>健康事件</span><strong id="stat-events">1</strong><small>按一次健康问题归档</small></div>
+          <div class="stat card"><span>症状记录</span><strong id="stat-symptoms">2</strong><small>保留变化时间线</small></div>
+          <div class="stat card"><span>用药记录</span><strong id="stat-medication">1</strong><small>记录实际服用情况</small></div>
+        </div>
+        <div class="two-column">
+          <div class="card roomy"><div class="section-heading"><div><span class="eyebrow">RECENT EVENTS</span><h3>最近的健康事件</h3></div><button class="text-btn" data-nav="events">查看全部 →</button></div><div id="home-events"></div></div>
+          <div class="card roomy"><div class="section-heading"><div><span class="eyebrow">HOW IT WORKS</span><h3>三步完成一次记录</h3></div></div>
+            <div class="steps"><div class="step"><span>01</span><div><strong>选位置</strong><p>正反人体图定位，也可以不选择位置</p></div></div><div class="step"><span>02</span><div><strong>描述不适</strong><p>选择症状、程度和发生时间</p></div></div><div class="step"><span>03</span><div><strong>持续补充</strong><p>后续记录用药、变化及就医经过</p></div></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-record" aria-label="记录不适">
+        <div class="section-intro"><span class="eyebrow">NEW SYMPTOM</span><h2>哪里不舒服？</h2><p>先选位置，再描述感受。不确定位置也没关系，所有内容都可以之后补充。</p></div>
+        <div class="record-layout">
+          <div class="card body-card">
+            <div class="card-head"><div><h3>① 选择身体部位</h3><p>可以选择多个部位 · 点击区域高亮</p></div><button class="light-btn" id="clear-areas">清空选择</button></div>
+            <div class="segmented" role="group" aria-label="人体视角"><button id="switch-front" class="active" type="button">正面</button><button id="switch-back" type="button">背面</button></div>
+            <div class="body-stage"><svg id="body-svg" viewBox="0 0 320 500" role="img" aria-label="可交互人体部位示意图"></svg><span class="stage-label" id="body-side">正面视图</span></div>
+            <div class="zone-summary"><strong>已选区域</strong><div id="selected-areas" class="area-tags"><span class="muted">尚未选择，可直接填写症状</span></div></div>
+            <button class="plain-choice" id="unlocated" type="button">◎ 全身不适 / 说不清具体位置</button>
+          </div>
+          <div class="card form-card">
+            <div class="card-head"><div><h3>② 记录症状</h3><p>尽可能记录真实感受，不必使用专业术语</p></div><span class="step-count">第 2 步 / 共 2 步</span></div>
+            <label class="field-label">不适类型 <span class="optional">可多选</span></label>
+            <div class="chips" id="symptom-chips">
+              <button type="button" data-symptom="疼痛">疼痛</button><button type="button" data-symptom="胀痛">胀痛</button><button type="button" data-symptom="刺痛">刺痛</button><button type="button" data-symptom="酸痛">酸痛</button><button type="button" data-symptom="麻木">麻木</button><button type="button" data-symptom="瘙痒">瘙痒</button><button type="button" data-symptom="恶心">恶心</button><button type="button" data-symptom="头晕">头晕</button><button type="button" data-symptom="乏力">乏力</button><button type="button" data-symptom="其他">其他</button>
+            </div>
+            <div class="field-group"><div class="label-between"><label for="severity">不适程度 <span class="optional">主观评分</span></label><strong><span id="severity-value">5</span> / 10</strong></div><input type="range" min="0" max="10" step="1" id="severity" value="5" /><div class="range-label"><span>没有不适</span><span>最严重的不适</span></div><label class="inline-check"><input type="checkbox" id="severity-unknown" /> 无法评分 / 不适用</label></div>
+            <div class="field-group"><label class="field-label" for="symptom-onset">开始时间</label><input type="datetime-local" id="symptom-onset" class="field-input" /><small class="helper">可以补记过去发生的时间</small></div>
+            <div class="field-group"><label class="field-label" for="symptom-notes">补充说明 <span class="optional">选填</span></label><textarea id="symptom-notes" rows="3" class="field-input" placeholder="例如：走路时更明显，休息一会儿稍有缓解……"></textarea></div>
+            <div class="field-group"><label class="field-label" for="target-event">保存到哪个健康事件？</label><select class="field-input" id="target-event"><option value="new">＋ 新建健康事件</option></select></div>
+            <button class="btn btn-primary full-width" id="save-symptom" type="button">保存症状记录 <span aria-hidden="true">→</span></button>
+            <p class="form-footnote">保存不需要 AI 参与；不必为了获取分析而填写所有字段。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-events" aria-label="健康事件">
+        <div class="section-intro"><span class="eyebrow">HEALTH EVENTS</span><h2>把一次不适，记录成完整的经过。</h2><p>症状、服药、后续变化与就医资料都围绕同一次健康事件整理。</p></div>
+        <div class="events-layout"><div class="card event-list-card"><div class="section-heading"><h3>事件列表</h3><button class="light-btn" data-nav="record">＋ 新记录</button></div><div id="event-picker"></div></div>
+          <div class="card event-detail-card"><div id="event-detail"></div></div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-medication" aria-label="用药记录">
+        <div class="section-intro"><span class="eyebrow">MEDICATION LOG</span><h2>记录吃过什么药，而不是凭记忆回想。</h2><p>药名、实际服用时间与剂量由你填写并核对；这里不会计算或推荐用药剂量。</p></div>
+        <div class="two-column-med"><div class="card roomy">
+          <h3>新增用药记录</h3>
+          <div class="field-group"><label class="field-label" for="med-name">药物名称</label><input id="med-name" class="field-input" placeholder="例如：演示用药 A（请不要填写真实信息）" /></div>
+          <div class="field-group"><label class="field-label" for="med-dose">实际服用量及单位</label><div class="input-pair"><input id="med-dose" class="field-input" placeholder="例如：1" /><select id="med-unit" class="field-input" aria-label="剂量单位"><option value="片">片</option><option value="粒">粒</option><option value="mg">mg</option><option value="mL">mL</option><option value="其他">其他</option></select></div><small class="helper">不同规格药物不能仅根据“片数”自动换算剂量。</small></div>
+          <div class="field-group"><label class="field-label" for="med-time">实际服用时间</label><input id="med-time" class="field-input" type="datetime-local" /></div>
+          <div class="field-group"><label class="field-label" for="med-event">关联健康事件</label><select id="med-event" class="field-input"></select></div>
+          <div class="field-group"><label class="field-label" for="med-note">用药后的感受 <span class="optional">选填</span></label><textarea id="med-note" class="field-input" rows="3" placeholder="只是记录自己的感觉，不代表药物疗效或不良反应已被确认"></textarea></div>
+          <button class="btn btn-primary full-width" id="save-med" type="button">保存实际用药记录 →</button>
+          <p class="form-footnote">药物识别、处方审核、相互作用分析均未在本原型中实现。</p>
+        </div><div class="card roomy"><div class="section-heading"><h3>已记录用药</h3><span class="subtle-note">仅虚构演示数据</span></div><div id="medication-list"></div></div></div>
+      </section>
+
+      <section class="screen" id="screen-ai" aria-label="AI 辅助问询演示">
+        <div class="section-intro"><span class="eyebrow">ASSISTED REVIEW</span><h2>AI 帮你整理线索，不替你下诊断。</h2><p>这里演示可能的问询体验。尚未连接大模型，也没有通过医学审核的自动风险分级。</p></div>
+        <div class="ai-warning"><strong>重要安全说明</strong><p>此页面不是医疗建议。演示答案不会产生任何真实疾病结论或风险等级。如出现严重胸痛、明显呼吸困难、突发单侧无力等紧急情况，应立即联系当地急救服务。</p></div>
+        <div class="ai-layout"><div class="card roomy"><div class="ai-head"><span class="ai-bubble">✧</span><div><strong>智能补充问询 · 演示</strong><p>从当前事件的记录中挑选几个有助于描述病情的问题</p></div></div><div id="qa-panel"></div></div>
+          <div class="card roomy"><h3>为什么这样设计？</h3><div class="principles"><div><span class="principle-index">01</span><p><strong>先识别紧急信号</strong><br>经审核的危险信号规则应先于语言模型运行。</p></div><div><span class="principle-index">02</span><p><strong>允许“不清楚”</strong><br>信息不足不应被自动解释为低风险。</p></div><div><span class="principle-index">03</span><p><strong>所有结论可追溯</strong><br>记录事实与 AI 提示必须明确区分。</p></div></div><button class="btn btn-outline full-width" id="show-alert-demo">查看紧急风险提示的样式示例</button><small class="helper">点击仅展示通用模板，不针对本次记录作医疗判断。</small></div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-report" aria-label="就医报告">
+        <div class="section-intro"><span class="eyebrow">VISIT SUMMARY</span><h2>就医前，把重要信息整理清楚。</h2><p>医生更需要可追溯的时间线、实际用药与待确认问题，而不是 AI 猜测的诊断。</p></div>
+        <div class="report-toolbar"><div><label for="report-event">选择健康事件</label><select id="report-event" class="field-input"></select></div><label class="inline-check"><input type="checkbox" id="report-ai" /> 附加 AI 功能说明</label><div class="report-actions"><button class="btn btn-outline" id="copy-report">复制文字</button><button class="btn btn-primary" id="print-report">打印 / 保存 PDF</button></div></div>
+        <article class="report-page" id="report-page" aria-label="健康事件报告预览"><div id="report-content"></div></article>
+        <div class="report-disclaimer">报告为用户自述及虚构演示资料的整理，不构成诊断。正式产品需要支持逐条核对原始数据与来源。</div>
+      </section>
+    </main>
+  </div>
+  <nav class="mobile-nav" aria-label="移动端导航"><button class="active" data-nav="home"><span>⌂</span>首页</button><button data-nav="record"><span>◎</span>记录</button><button data-nav="events"><span>☷</span>事件</button><button data-nav="ai"><span>✧</span>AI</button><button data-nav="report"><span>▤</span>报告</button></nav>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="modal-backdrop" id="emergency-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden><div class="modal-card"><span class="modal-symbol">!</span><h3 id="modal-title">紧急风险提示 · 界面模板</h3><p><strong>这是虚构设计示例，不是根据您的数据作出的判断。</strong></p><p>真实产品在经过医学审核的危险信号规则触发时，应立即展示清晰的求助行动提示，不能等待 AI 回复，也不能让 AI 降低规则提示级别。</p><p>如实际出现明显危急症状，请立即联系当地急救服务。</p><button class="btn btn-primary full-width" id="close-modal">关闭示例</button></div></div>
+  <script src="./app.js"></script>
+</body>
+</html>
