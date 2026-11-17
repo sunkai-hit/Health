@@ -290,6 +290,7 @@
     if(!event){notify("请先建立健康事件");return false;}
     event.entries.push(entry);
     state.currentEventId=event.id;
+    state.qaIndex=0;state.qaAnswers=[];
     renderEverything();
     $("care-event").value=event.id; renderLinkedChoices();renderCare();
     notify("记录已保存：医嘱与实际执行会分开展示");
@@ -457,6 +458,7 @@
     }
     e.entries.push({ id: "s-" + Date.now(), kind: "symptom", when: when, zones: zones, unlocated: state.unlocated, symptoms: symptoms, severity: severity, notes: notes, radiation: from && to ? {from:state.zones.get(from),to:state.zones.get(to)} : null });
     state.currentEventId = e.id;
+    state.qaIndex=0;state.qaAnswers=[];
     state.symptoms.clear(); state.zones.clear(); state.unlocated = false; state.activeZone=null;state.radiationFrom="";state.radiationTo="";
     $("symptom-notes").value = ""; $("severity").value = 5; $("severity-unknown").checked = true; $("severity").disabled = true; $("severity-value").textContent = "未评分";
     renderEverything(); notify("已保存症状，并关联到健康事件"); go("events");
@@ -468,6 +470,7 @@
     if (!event) { notify("请先新建健康事件，再记录本次用药"); return; }
     event.entries.push({ id: "m-" + Date.now(), kind: "med", when: when, name: name.slice(0, 120), dose: dose.slice(0, 60), unit: $("med-unit").value, notes: $("med-note").value.trim(),orderId:$("med-order").value });
     state.currentEventId = event.id;
+    state.qaIndex=0;state.qaAnswers=[];
     $("med-name").value = ""; $("med-dose").value = ""; $("med-note").value = "";
     renderEverything(); notify("实际用药记录已关联到健康事件"); go("events");
   }
@@ -486,7 +489,7 @@
       const nav = event.target.closest("[data-nav]");
       if (nav) { go(nav.dataset.nav); return; }
       const eventChoice = event.target.closest("[data-event]");
-      if (eventChoice) { state.currentEventId = eventChoice.dataset.event; renderEverything(); go("events"); return; }
+      if (eventChoice) { state.currentEventId = eventChoice.dataset.event; state.qaIndex=0;state.qaAnswers=[]; renderEverything(); go("events"); return; }
       const answer = event.target.closest("[data-answer]");
       if (answer) { state.qaAnswers.push(answer.dataset.answer); state.qaIndex++; renderQA(); return; }
       const remove = event.target.closest("[data-remove-zone]");
@@ -551,7 +554,7 @@
     $("save-visit").addEventListener("click",saveVisit);
     $("save-order").addEventListener("click",saveOrder);
     $("save-treatment").addEventListener("click",saveTreatment);
-    $("report-event").addEventListener("change", function () { state.currentEventId = this.value; renderReport(); });
+    $("report-event").addEventListener("change", function () { state.currentEventId = this.value; state.qaIndex=0;state.qaAnswers=[]; renderReport(); });
     $("report-mode").addEventListener("change",renderReport);
     $("qa-event").addEventListener("change",function(){state.qaIndex=0;state.qaAnswers=[];renderQA();});
     $("report-ai").addEventListener("change", renderReport);
