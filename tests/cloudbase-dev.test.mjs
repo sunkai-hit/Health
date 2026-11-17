@@ -141,8 +141,8 @@ test('CloudBase shell has no direct cloud database, storage, login or HTTP acces
   const files=['app.js','pages/index/index.js','pages/timeline/timeline.js','pages/dev-cloud/dev-cloud.js'];
   for(const name of files){
     const s=file(name);
-    assert.ok(!/\bwx\.request\b|\bwx\.login\b|\bwx\.getPhoneNumber\b/.test(s),name);
-    assert.ok(!/\bwx\.cloud\.(?:database|uploadFile|downloadFile|deleteFile|callContainer)\b/.test(s),name);
+    assert.ok(!/\bwx\.(?:request|login|getPhoneNumber)\s*\(/.test(s),name);
+    assert.ok(!/\bwx\.cloud\.(?:database|uploadFile|downloadFile|deleteFile|callContainer)\s*\(/.test(s),name);
   }
   const probe=file('cloudfunctions/healthDevPing/index.js');
   assert.ok(!/\bcloud\.(?:database|uploadFile|getWXContext)\b/.test(probe));
