@@ -9,6 +9,14 @@
 
 **核心原则：** 记录简单；风险识别谨慎；报告专业；隐私优先。
 
+## 交互原型（需求评审版）
+
+- 原型目录：[`prototype/v0.1/`](./prototype/v0.1/)
+- 使用说明：[`prototype/v0.1/README.md`](./prototype/v0.1/README.md)
+- 交互规格：[`docs/UX-SPEC-V0.1.md`](./docs/UX-SPEC-V0.1.md)
+
+原型文件在 `docs/requirements-v0.1` 需求分支上，尚未合入 `main`。请先评审 Draft PR #1。原型采用虚构数据，不能用于真实病情判断。
+
 ## 文档及协作
 
 - 产品需求基线：`docs/PRD-V0.1.md`
