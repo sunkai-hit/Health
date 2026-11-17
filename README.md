@@ -84,3 +84,13 @@
 - [本地 API 运行说明](./src/mvp/README.md)
 
 **未合入 main，未公开部署。** A/B 演示令牌可由本地使用者任意申请，不是生产登录；仓库是 Public，禁止录入真实病历、患者信息和任何敏感数据。
+
+
+## S2 联调页浏览器验收补强（2026-11-17）
+
+- [PR #17](https://github.com/sunkai-hit/Health/pull/17)：真正通过本地 Worker + D1 执行虚构 A/B 账户浏览器 E2E
+- [验收和竞态问题记录](./docs/SPRINT-S2-BROWSER-QA-RESULTS.md)
+- [CI 修复后运行](https://github.com/sunkai-hit/Health/actions/runs/44025858347)：12/12 新浏览器、27/27 API、8/8 SQLite、18/18 旧原型，共 65/65 通过
+- 发现并修复快速身份切换的过期请求覆盖当前界面问题；不引入新业务范围
+
+**警告：** 演示账号不是真实身份认证，仍然不能保存真实健康资料或公开部署。
