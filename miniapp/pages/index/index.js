@@ -10,5 +10,8 @@ Page({
   },
   openTimeline(){
     wx.navigateTo({url:'/pages/timeline/timeline'});
+  },
+  openCloudDev(){
+    wx.navigateTo({url:'/pages/dev-cloud/dev-cloud'});
   }
 });
