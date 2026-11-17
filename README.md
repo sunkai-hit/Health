@@ -9,6 +9,14 @@
 
 **核心原则：** 记录简单；风险识别谨慎；报告专业；隐私优先。
 
+## 交互原型（需求评审版）
+
+- 原型目录：[`prototype/v0.1/`](./prototype/v0.1/)
+- 使用说明：[`prototype/v0.1/README.md`](./prototype/v0.1/README.md)
+- 交互规格：[`docs/UX-SPEC-V0.1.md`](./docs/UX-SPEC-V0.1.md)
+
+原型文件在 `docs/requirements-v0.1` 需求分支上，尚未合入 `main`。请先评审 Draft PR #1。原型采用虚构数据，不能用于真实病情判断。
+
 ## 文档及协作
 
 - 产品需求基线：`docs/PRD-V0.1.md`
@@ -29,3 +37,39 @@
 ## 技术方向（建议，尚未定稿）
 
 移动端优先的 PWA；模块化后端；健康记录、风险规则与 AI 辅助分析解耦。技术选型在需求评审通过后再确认。
+
+
+## 2026-11-17 需求与原型迭代
+
+- 用户已同意沿现有设计继续深化，新增“医生医嘱、处方、实际治疗和用药记录纳入全程健康事件与就医报告”的需求。
+- 专题需求：[\`docs/CARE-AND-ORDERS-V0.1.md\`](./docs/CARE-AND-ORDERS-V0.1.md)
+- 自适应问询设计：[\`docs/QUESTIONNAIRE-DESIGN-V0.1.md\`](./docs/QUESTIONNAIRE-DESIGN-V0.1.md)
+- 浏览器原型新增：二级身体区域、症状延伸方向、就医/医嘱/治疗记录和报告双视图。
+- 协作跟踪：[Care Epic #9](https://github.com/sunkai-hit/Health/issues/9)。
+- 尚待评审：精准点位与二级字典覆盖、多药处方明细、医疗文件上传核验、报告隐私遮蔽及临床/安全验证。
+
+### 单文件原型预览
+
+下载 [`prototype/v0.1/preview.html`](./prototype/v0.1/preview.html) 后可直接在浏览器体验，无需启动服务器。它集成了页面、样式和脚本，是当前需求分支中的便携演示版（只包含虚构示例和页面内存数据）。
+
+
+## 最新进展：多药处方及复诊管理原型
+
+- [处方、医嘱版本与复诊需求](./docs/PRESCRIPTION-FOLLOWUP-V0.1.md)
+- [便携离线预览](./prototype/v0.1/preview.html)
+- 已加入多药处方明细、医嘱版本替代、实际用药药品项关联、复诊计划和对照视图。
+- 原型中图片仅本地预览，不上传、不 OCR，也不会保存真实患者数据。
+- 仍处于 Draft PR 评审阶段，未合入 main。
+
+
+## 工程基线与自动化验收（2026-11-17）
+
+- [技术架构 V0.1](./docs/TECH-ARCHITECTURE-V0.1.md)：部署可替换的 PWA/API/关系数据库/私有附件架构
+- [API 契约](./docs/API-CONTRACT-V0.1.md)：健康事件、医嘱、实际用药、治疗、复诊、报告设计
+- [安全与隐私设计](./docs/SECURITY-PRIVACY-V0.1.md)：授权、越权校验、加密、AI/OCR 数据治理
+- [SQLite 初始迁移草案](./db/migrations/0001_initial.sql)
+- [CI 实测结果](./docs/QA-RESULTS-2026-11-17.md)：桌面/模拟移动浏览器 18/18 通过，SQLite 8/8 通过
+- [GitHub Actions](./.github/workflows/prototype-e2e.yml)：PR 自动运行原型测试及数据库基本检查
+- [架构实施 Epic #12](https://github.com/sunkai-hit/Health/issues/12)
+
+**研发阶段门：** 当前只有虚构数据原型、技术设计、数据库草案和自动化测试。尚未完成可存真实健康数据的 API、云端部署、合规评估、加密密钥管理或真实医学分诊。

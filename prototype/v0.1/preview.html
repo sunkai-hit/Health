@@ -1,0 +1,981 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <title>Health · 个人健康记录助手 V0.1 交互原型</title>
+  <style>
+:root{--ink:#183b41;--muted:#788e90;--sea:#167c79;--sea2:#3bac9e;--pale:#eff8f6;--line:#e3efed;--paper:#fff;--bg:#f5faf9;--danger:#a84c41;--shadow:0 14px 45px rgba(18,77,75,.055);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-size:14px}button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid rgba(47,163,152,.4);outline-offset:2px}a{color:var(--sea)}.app-shell{display:flex;min-height:100vh;max-width:1640px;margin:auto}.sidebar{background:#f0f8f5;width:246px;flex:none;padding:34px 20px 26px;border-right:1px solid #e1eeea;min-height:100vh;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}.brand{display:flex;align-items:center;gap:12px;margin:0 8px 58px}.brand-mark{width:47px;height:47px;border-radius:16px;background:#167e77;color:white;display:grid;place-items:center;font-size:29px;box-shadow:0 9px 18px #167e7735}.brand strong{font-size:23px;letter-spacing:-.8px}.brand small{display:block;color:#668b87;letter-spacing:1px;font-size:11px;margin-top:2px}.nav-kicker,.eyebrow{color:#7fa29b;font-size:10px;font-weight:750;letter-spacing:2.3px;text-transform:uppercase}.nav-kicker{padding-left:15px;margin:0 0 16px}.nav-list{display:flex;flex-direction:column;gap:7px}.nav-item{border:0;background:transparent;text-align:left;border-radius:13px;padding:13px 14px;color:#5d7776;display:flex;align-items:center;gap:14px;font-weight:550;transition:.2s}.nav-item:hover{background:#e5f2ef}.nav-item.active{color:#fff;background:#177e79;box-shadow:0 7px 18px #167e7725}.nav-emoji{font-size:23px;font-weight:300;width:26px;text-align:center}.sidebar-bottom{margin-top:auto}.sidebar-tip{background:#e3f2ec;border-radius:16px;padding:18px;color:#386a63;margin-bottom:22px}.sidebar-tip strong{font-size:13px}.sidebar-tip p{font-size:12px;line-height:1.8;margin-bottom:0;color:#668781}.sidebar-bottom>small{color:#8daaa4;padding:0 14px}.workspace{flex:1;min-width:0;max-width:1360px;padding:36px clamp(22px,4vw,65px) 80px}.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}.topbar h1{font-size:26px;margin:10px 0 9px;font-weight:750;letter-spacing:-.7px}.topbar p{color:var(--muted);margin:0;line-height:1.7}.header-actions{display:flex;align-items:center;gap:17px;padding-top:15px;white-space:nowrap}.demo-pill{display:inline-flex;align-items:center;gap:8px;padding:10px 13px;color:#64847f;background:#e5f1ed;border:1px solid #d7e9e4;border-radius:40px;font-size:12px}.demo-dot{width:7px;height:7px;border-radius:50%;background:#35a991}.avatar{width:35px;height:35px;border-radius:50%;display:grid;place-items:center;color:white;font-weight:700;background:linear-gradient(140deg,#79bdb0,#286d74)}.notice{display:flex;gap:13px;align-items:flex-start;background:#fff8e9;color:#776549;border:1px solid #f1e5ce;padding:13px 17px;border-radius:13px;font-size:12px;line-height:1.8;margin:28px 0 27px}.notice span{font-size:20px;line-height:1.1}.notice strong{color:#614e32}.screen{display:none;animation:fadeIn .22s ease}.screen.active{display:block}@keyframes fadeIn{from{opacity:.6;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}.hero{border-radius:23px;min-height:300px;background:linear-gradient(110deg,#1c817b,#278f85 60%,#58a899);color:#fff;display:flex;position:relative;overflow:hidden;padding:42px 52px}.hero-content{z-index:2;position:relative;max-width:500px}.hero-overline{font-size:11px;letter-spacing:3px;color:#c4efdd}.hero h2{font-size:35px;line-height:1.4;margin:16px 0 9px;font-weight:700;letter-spacing:-1px}.hero p{line-height:1.9;max-width:420px;color:#e3f7ed;margin:0 0 23px}.hero-art{position:absolute;top:0;bottom:0;right:1%;width:39%;display:grid;place-items:center}.pulse{position:absolute;border:1px solid rgba(233,255,245,.22);border-radius:50%;aspect-ratio:1}.pulse-a{width:210px}.pulse-b{width:320px}.pulse-c{width:440px}.pulse-heart{font-size:118px;color:#c3ebd9;opacity:.9;filter:drop-shadow(0 12px 25px rgba(7,65,61,.16))}.btn{display:inline-flex;justify-content:center;align-items:center;gap:16px;padding:13px 20px;border-radius:11px;border:0;font-size:14px;font-weight:650;transition:.18s;white-space:nowrap}.btn:hover{transform:translateY(-1px)}.btn-white{background:white;color:var(--sea)}.btn-primary{background:var(--sea);color:white;box-shadow:0 6px 15px #167c7920}.btn-primary:hover{background:#116964}.btn-outline{background:#fff;color:var(--sea);border:1px solid #b6d6d0}.full-width{width:100%}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:17px;margin:21px 0}.card{background:var(--paper);border:1px solid var(--line);border-radius:19px;box-shadow:var(--shadow)}.stat{padding:23px 26px}.stat span{display:block;font-size:13px;color:#63817c}.stat strong{font-size:38px;display:block;font-weight:750;margin:9px 0 0;line-height:1.15}.stat small{color:#98a9a6}.two-column{display:grid;grid-template-columns:1.13fr 1fr;gap:19px}.roomy{padding:26px}.section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:25px}.section-heading h3{margin:5px 0;font-size:18px}.text-btn,.light-btn{border:0;background:transparent;color:var(--sea);font-weight:650}.light-btn{padding:9px 12px;border-radius:8px;background:#eff8f6;font-size:12px}.steps{display:grid;gap:20px}.step{display:flex;align-items:center;gap:17px}.step>span{background:#eaf6f2;border-radius:12px;color:#348d7e;font-weight:700;width:39px;height:39px;display:grid;place-items:center}.step strong{display:block;margin-bottom:5px}.step p{color:var(--muted);margin:0;font-size:12px}.event-preview{border:1px solid #e2eeeb;border-radius:14px;padding:16px;margin-bottom:11px;cursor:pointer}.event-preview:hover{border-color:#8dc9bd}.event-preview-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.event-preview h4{margin:0;font-size:15px}.status-pill{display:inline-block;background:#e4f3ef;color:#228779;border-radius:20px;font-size:11px;padding:5px 10px}.event-preview p{color:#778e8b;font-size:12px;line-height:1.8}.event-preview small{font-size:11px;color:#98a9a5}.section-intro{margin:8px 0 24px}.section-intro h2{font-size:25px;margin:10px 0 9px}.section-intro>p{margin:0;color:var(--muted);line-height:1.8}.record-layout{display:grid;grid-template-columns:minmax(310px,.94fr) minmax(310px,1.06fr);gap:20px;align-items:start}.body-card{padding:23px}.form-card{padding:25px}.card-head{display:flex;align-items:start;justify-content:space-between;gap:12px;margin-bottom:23px}.card-head h3{font-size:17px;margin:0 0 7px}.card-head p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}.step-count{font-size:11px;white-space:nowrap;color:#8da5a0}.segmented{display:flex;padding:4px;background:#eaf5f1;border-radius:11px;gap:3px}.segmented button{flex:1;border:0;background:transparent;padding:10px;border-radius:8px;color:#70928b}.segmented button.active{background:#fff;color:#167e78;font-weight:700;box-shadow:0 3px 12px rgba(31,104,91,.09)}.body-stage{position:relative;display:flex;justify-content:center;align-items:center;min-height:455px;background:radial-gradient(ellipse at 50% 40%,#f7fcfa 0,#f0f8f5 68%,#edf6f2 100%);border-radius:15px;margin:15px 0;padding:10px;overflow:hidden}.body-stage::after{content:"";width:70%;height:1px;background:#b9d8d0;bottom:27px;left:15%;position:absolute}.body-stage svg{height:440px;width:min(100%,300px);touch-action:manipulation}.body-outline{fill:#deeee8;stroke:#bad9cf;stroke-width:2}.body-zone{fill:#bddcd2;stroke:#f6fffb;stroke-width:2.5;cursor:pointer;transition:fill .15s,filter .15s}.body-zone:hover{fill:#69bfb0;filter:drop-shadow(0 0 3px #9be1d7)}.body-zone.selected{fill:#168c7e;stroke:#fff;stroke-width:2.7}.body-zone:focus{outline:none;stroke:#ffbd64;stroke-width:4}.zone-mini-label{fill:#6b948a;font-size:10px;pointer-events:none}.stage-label{position:absolute;bottom:40px;right:14px;font-size:11px;background:#ffffffb9;border:1px solid #d9ebe4;border-radius:50px;padding:6px 9px;color:#70968f}.zone-summary{background:#f6faf9;padding:14px;border-radius:11px}.zone-summary strong{font-size:12px}.area-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;min-height:20px}.area-tag{border:1px solid #b9dcd3;background:#ecf8f4;border-radius:30px;padding:5px 10px;font-size:11px;color:#267a6f;cursor:pointer}.area-tag:hover{background:#d5eee7}.muted{color:#9aa9a6;font-size:12px}.plain-choice{width:100%;color:#4b857e;background:#f6fbf8;border:1px dashed #bcdbd3;border-radius:10px;padding:11px;margin-top:12px}.plain-choice.active{color:#fff;background:#459c8e}.field-label,.label-between label,.report-toolbar label{display:block;font-size:13px;font-weight:650;margin-bottom:10px}.optional{font-size:11px;color:#9caeaa;font-weight:400;margin-left:5px}.chips{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 25px}.chips button{border-radius:40px;padding:9px 13px;color:#62817a;background:#f8fbfa;border:1px solid #e1efeb}.chips button.selected{background:#dff4ed;border-color:#6dbcae;color:#11786e;font-weight:650}.field-group{margin:19px 0}.field-input{width:100%;border:1px solid #dae8e5;background:#fbfdfc;color:var(--ink);padding:12px 13px;border-radius:10px;min-height:43px}.field-input::placeholder{color:#a7b7b3}textarea.field-input{resize:vertical;line-height:1.7}input[type=range]{width:100%;accent-color:var(--sea);cursor:pointer}.label-between{display:flex;align-items:center;justify-content:space-between}.label-between strong{color:var(--sea)}.range-label{display:flex;justify-content:space-between;color:#95a9a3;font-size:11px}.helper,.form-footnote{color:#9badab;display:block;font-size:11px;line-height:1.7;margin-top:8px}.form-footnote{text-align:center;margin-top:13px}.inline-check{display:flex;align-items:center;gap:7px;font-size:12px;color:#64817c;margin-top:12px;cursor:pointer}.inline-check input{accent-color:var(--sea)}.events-layout{display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:start}.event-list-card,.event-detail-card{padding:22px}.event-list-card .section-heading{margin-bottom:15px}.event-choice{width:100%;border:1px solid #e2ebe9;background:#fff;border-radius:12px;padding:15px;text-align:left;margin-bottom:9px;color:var(--ink)}.event-choice.selected{border-color:#55b7a7;background:#edf8f4}.event-choice strong,.event-choice small{display:block}.event-choice strong{font-size:14px;margin-bottom:8px}.event-choice small{font-size:11px;color:#839e97}.detail-top{display:flex;justify-content:space-between;gap:12px;align-items:center;padding-bottom:15px;border-bottom:1px solid var(--line)}.detail-top h3{font-size:19px;margin:0 0 7px}.detail-top p{color:#859d96;margin:0;font-size:12px}.detail-actions{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0}.timeline{border-left:2px solid #dceee8;margin:22px 0 8px 12px}.timeline-item{position:relative;margin:0 0 26px 24px}.timeline-dot{position:absolute;left:-34px;top:2px;width:18px;height:18px;background:#d9f1e9;border:4px solid #fff;border-radius:100%;box-shadow:0 0 0 1px #bde1d6}.timeline-item.med .timeline-dot{background:#d4e5f5;box-shadow:0 0 0 1px #c5d6e5}.timeline-item small{color:#8ba19b;font-size:11px}.timeline-item strong{display:block;margin:6px 0;font-size:14px}.timeline-item p{margin:0;color:#6b837e;line-height:1.8;font-size:12px}.empty{background:#f8fbfa;padding:32px 20px;border-radius:13px;text-align:center;color:#839991}.two-column-med{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}.two-column-med h3{font-size:17px;margin:0 0 23px}.input-pair{display:grid;grid-template-columns:1fr 120px;gap:9px}.med-list-item{padding:17px 0;border-bottom:1px solid var(--line)}.med-list-item:first-child{padding-top:0}.med-list-item strong{font-size:14px}.med-list-item p{color:#819992;line-height:1.8;margin:9px 0 0;font-size:12px}.subtle-note{font-size:11px;color:#9aada7}.ai-warning{border-radius:13px;border:1px solid #f1d6b6;background:#fff8ed;color:#80644a;padding:16px 20px;margin-bottom:20px;line-height:1.8;font-size:12px}.ai-warning p{margin:7px 0 0}.ai-layout{display:grid;grid-template-columns:1.06fr .94fr;gap:19px;align-items:start}.ai-head{display:flex;align-items:center;gap:13px;padding-bottom:22px;border-bottom:1px solid var(--line)}.ai-head p{color:#92a5a0;font-size:12px;margin:5px 0 0;line-height:1.6}.ai-bubble{background:#e2f4ee;display:grid;place-items:center;width:48px;height:48px;border-radius:15px;color:#188779;font-size:26px}.qa-box{background:#f2f9f6;border-radius:15px;padding:19px;margin-top:18px}.qa-box small{color:#5c988c}.qa-box h4{font-size:16px;margin:11px 0}.qa-choices{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}.qa-choices button{padding:10px 13px;background:#fff;border:1px solid #cce4dc;border-radius:9px;color:#527e76}.qa-choices button:hover{background:#e4f5ef}.qa-finished{padding:18px 0;color:#5c8279;line-height:1.9}.qa-finished h4{color:var(--ink);margin:0 0 8px}.qa-finished ul{padding-left:18px}.principles{display:grid;gap:19px;margin:24px 0}.principles>div{display:flex;align-items:start;gap:13px}.principle-index{width:36px;height:36px;background:#eff8f4;color:#479b8f;border-radius:10px;display:grid;place-items:center;flex:none;font-size:12px;font-weight:bold}.principles p{line-height:1.9;margin:0;color:#758d85;font-size:12px}.principles strong{color:var(--ink);font-size:13px}.report-toolbar{display:flex;align-items:end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:12px 0 20px}.report-toolbar>div:first-child{min-width:240px}.report-toolbar .inline-check{margin-bottom:15px}.report-actions{display:flex;gap:10px}.report-page{background:white;border:1px solid #e0ece8;border-radius:4px;min-height:670px;max-width:850px;margin:auto;padding:48px 50px;box-shadow:0 15px 42px rgba(45,81,76,.08)}.report-title{text-align:center;border-bottom:2px solid #188779;padding-bottom:23px;margin-bottom:24px}.report-title h2{font-size:25px;margin:8px}.report-title p{color:#84968e;font-size:12px}.report-meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:9px;padding:13px;background:#f4f9f7;color:#5a7770;font-size:12px;border-radius:7px}.report-section{margin-top:27px}.report-section h3{font-size:15px;border-left:3px solid #269a8b;padding-left:11px;margin:0 0 13px}.report-section p,.report-section li{font-size:13px;color:#526d66;line-height:2}.report-section ul{padding-left:20px;margin:0}.report-section .timeline-row{display:grid;grid-template-columns:155px 1fr;gap:14px;border-bottom:1px solid #edf3f1;padding:10px 0;color:#586e68;font-size:12px;line-height:1.8}.report-section .timeline-row>span:first-child{color:#88a29a}.report-foot{color:#96a7a1;border-top:1px solid #e2ede9;margin-top:35px;padding-top:18px;font-size:11px;line-height:1.8}.report-disclaimer{color:#8ba29b;text-align:center;font-size:11px;margin:15px 0}.toast{position:fixed;right:25px;bottom:22px;background:#183e3b;color:white;border-radius:12px;padding:14px 18px;box-shadow:0 12px 25px #254d4540;z-index:100;opacity:0;pointer-events:none;transform:translateY(10px);transition:.2s}.toast.show{opacity:1;transform:translateY(0)}.modal-backdrop{position:fixed;inset:0;background:#0f2b2b8a;display:grid;place-items:center;z-index:150;padding:20px}.modal-backdrop[hidden]{display:none}.modal-card{width:min(460px,100%);background:white;border-radius:20px;padding:29px;line-height:1.8;color:#5c6f6b}.modal-card h3{color:#9e5141;margin:13px 0}.modal-symbol{background:#fcece7;color:#ad5545;width:45px;height:45px;display:grid;place-items:center;border-radius:50%;font-weight:bold;font-size:23px}.mobile-nav{display:none}
+@media(max-width:1220px){.workspace{padding:30px 25px 90px}.record-layout{grid-template-columns:1fr 1fr}.sidebar{width:215px;padding:26px 14px}.brand{margin-bottom:42px}.hero{padding:35px}.hero h2{font-size:30px}.hero-art{opacity:.7}}
+@media(max-width:970px){.sidebar{width:78px;align-items:center;padding:24px 9px}.brand{margin:0 0 38px}.brand>div,.nav-kicker,.sidebar-bottom,.nav-item:not(.active){font-size:0}.brand-mark{width:46px;height:46px}.nav-item{width:56px;height:56px;justify-content:center;padding:0;font-size:0}.nav-item .nav-emoji{font-size:27px}.nav-list{width:100%;align-items:center}.workspace{padding:26px 22px 85px}.record-layout,.events-layout,.two-column-med{grid-template-columns:1fr}.body-card{max-width:none}.body-stage{min-height:430px}.two-column{grid-template-columns:1fr}.ai-layout{grid-template-columns:1fr}}
+@media(max-width:650px){.sidebar{display:none}.workspace{padding:23px 16px 110px}.topbar h1{font-size:22px}.topbar p{font-size:12px}.topbar .eyebrow{font-size:9px}.header-actions{padding-top:0}.avatar{display:none}.demo-pill{font-size:10px;padding:7px 9px}.notice{margin:18px 0 22px;padding:11px 12px}.hero{padding:29px 25px;min-height:280px}.hero h2{font-size:27px}.hero p{font-size:12px;max-width:275px}.hero-art{right:-30%;width:80%;opacity:.27}.pulse-a{width:160px}.pulse-b{width:250px}.pulse-c{width:350px}.stats{gap:9px}.stat{padding:15px}.stat strong{font-size:29px}.stat span,.stat small{font-size:11px}.roomy,.form-card,.body-card{padding:20px}.section-intro h2{font-size:22px}.record-layout{gap:13px}.body-stage{min-height:420px}.body-stage svg{height:410px}.event-list-card,.event-detail-card{padding:17px}.report-toolbar>div:first-child{width:100%}.report-toolbar .inline-check{margin:5px 0}.report-actions{width:100%}.report-actions .btn{flex:1;font-size:12px;padding:11px}.report-page{padding:27px 20px;min-height:400px}.report-section .timeline-row{grid-template-columns:110px 1fr;gap:7px}.report-title h2{font-size:20px}.mobile-nav{position:fixed;display:flex;bottom:0;left:0;right:0;background:#fffffff5;border-top:1px solid #dceae5;z-index:40;box-shadow:0 -5px 22px #204e4911;justify-content:space-around;padding:7px 0 max(8px,env(safe-area-inset-bottom))}.mobile-nav button{border:0;background:transparent;color:#8aa29b;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;min-width:57px;padding:3px}.mobile-nav button span{font-size:21px}.mobile-nav button.active{color:#177e78;font-weight:700}.toast{bottom:80px;right:15px;left:15px;text-align:center}.input-pair{grid-template-columns:1fr 96px}}
+@media print{body{background:white}.sidebar,.topbar,.notice,.mobile-nav,.section-intro,.report-toolbar,.report-disclaimer,.toast,.modal-backdrop{display:none!important}.workspace{padding:0;display:block}.screen{display:none!important}#screen-report{display:block!important}.app-shell{display:block}.report-page{border:0;box-shadow:none;max-width:none;min-height:0;padding:0}.report-section{break-inside:avoid}.report-title{break-after:avoid}@page{size:A4;margin:16mm}}
+/* V0.1 iteration: secondary body locations and care history. */
+.zone-detail{border:1px solid #cde6de;border-radius:13px;background:#f5fbf8;padding:14px;margin:12px 0 14px;line-height:1.65}
+.zone-detail strong{font-size:13px;color:#245e56}
+.zone-detail p{font-size:12px;color:#718e84;margin:7px 0 10px}
+.detail-options{display:flex;gap:7px;flex-wrap:wrap}
+.detail-chip{border:1px solid #c3ddd5;border-radius:30px;padding:7px 11px;background:#fff;color:#4b8078;font-size:12px}
+.detail-chip.selected{background:#157f75;color:#fff;border-color:#157f75}
+.radiation-field .input-pair{grid-template-columns:1fr 1fr}
+.care-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.care-tabs button{padding:11px 17px;background:#edf6f2;color:#4a7d74;border:1px solid #cee7df;border-radius:10px}
+.care-tabs button.active{background:#167c79;border-color:#167c79;color:#fff;font-weight:700}
+.care-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:start}
+.care-form{display:none}
+.care-form.active{display:block}
+.care-form h3{margin:20px 0;font-size:18px}
+.care-item-title{display:block;margin-top:12px}
+.report-page .report-section ul{padding-left:20px}
+.report-page .report-section li{margin-bottom:7px}
+@media(max-width:970px){.care-layout{grid-template-columns:1fr}}
+@media(max-width:650px){.care-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.care-tabs button{padding:10px 6px;font-size:11px}.radiation-field .input-pair{grid-template-columns:1fr 1fr;gap:7px}}
+@media print{.care-tabs{display:none!important}}
+
+/* V0.1 prescription and follow-up interaction additions */
+.rx-section{padding:15px;border:1px solid #d2e8e1;background:#f5faf8;border-radius:14px;margin:18px 0}
+.rx-heading,.rx-item-top,.compare-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.rx-item{background:#fff;border:1px solid #deebe7;border-radius:12px;padding:15px;margin-top:13px}
+.rx-item-top{margin-bottom:12px}
+.rx-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px}
+.rx-grid .field-label{font-size:11px;color:#6f9088;line-height:1.5}
+.rx-section[hidden],.field-group[hidden],#med-item-block[hidden]{display:none!important}
+.photo-preview{padding:12px 14px;border:1px dashed #bdded5;background:#f7fbfa;border-radius:11px;line-height:1.7;color:#718a83;font-size:12px;overflow-wrap:anywhere}
+.photo-preview p{margin:0 0 7px}
+.photo-preview img{width:100%;height:auto;max-height:220px;object-fit:contain;border-radius:8px;background:#fff}
+.compare-card{border:1px solid #dbece6;border-radius:12px;padding:13px 15px;margin:11px 0}
+.compare-card p{color:#66827a;line-height:1.65;font-size:12px;margin:9px 0}
+.compare-heading strong{font-size:13px}
+.compare-heading .status-pill{font-size:10px}
+.compare-line{border-top:1px solid #e4eeea;padding:8px 0;display:flex;justify-content:space-between;gap:12px;font-size:11px;color:#587f74}
+.plan-list{padding:13px;background:#f3f9f6;border:1px solid #deeee8;border-radius:12px;margin-bottom:16px}
+.plan-list h4{margin:2px 0 12px}
+.plan-item{display:flex;flex-direction:column;gap:4px;border-top:1px solid #dcebe5;padding:10px 0}
+.plan-item strong{color:#11776b}.plan-item span{font-size:12px}.plan-item small{font-size:11px;color:#819b92}
+@media(max-width:650px){.rx-grid{grid-template-columns:1fr}.rx-section{padding:11px}.rx-item{padding:12px}.compare-heading{align-items:start}.compare-heading .status-pill{white-space:normal;text-align:center}}
+
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="brand"><span class="brand-mark">✳</span><div><strong>Health</strong><small>健康记录助手</small></div></div>
+      <p class="nav-kicker">我的健康空间</p>
+      <nav class="nav-list" id="desktop-nav">
+        <button class="nav-item active" data-nav="home"><span class="nav-emoji">⌂</span> 首页概览</button>
+        <button class="nav-item" data-nav="record"><span class="nav-emoji">◎</span> 记录不适</button>
+        <button class="nav-item" data-nav="events"><span class="nav-emoji">☷</span> 健康事件</button>
+        <button class="nav-item" data-nav="medication"><span class="nav-emoji">✚</span> 用药记录</button>
+        <button class="nav-item" data-nav="care"><span class="nav-emoji">⚕</span> 就医与医嘱</button>
+        <button class="nav-item" data-nav="ai"><span class="nav-emoji">✧</span> AI 辅助</button>
+        <button class="nav-item" data-nav="report"><span class="nav-emoji">▤</span> 就医报告</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="sidebar-tip"><strong>原型演示模式</strong><p>本页仅使用虚构示例与内存数据，不连接医疗 AI 或服务器。</p></div>
+        <small>V0.1 · 需求评审稿</small>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div class="topbar-titles"><div class="eyebrow">个人健康空间 / <span id="crumb">首页概览</span></div><h1 id="page-title">让每一次身体变化，都有迹可循</h1><p id="page-subtitle">记录当下的不适，为下一次就医留下清楚的线索。</p></div>
+        <div class="header-actions"><span class="demo-pill"><span class="demo-dot"></span>仅供原型测试</span><span class="avatar" title="虚构档案">H</span></div>
+      </header>
+      <div class="notice" role="note"><span>ⓘ</span><div><strong>原型与隐私提示</strong>：当前为离线交互演示，信息仅保存在当前页面内存中，刷新即重置。请勿输入真实病历或个人敏感资料；AI 页面不提供实际诊断或分诊。</div></div>
+
+      <section class="screen active" id="screen-home" aria-labelledby="home-heading">
+        <div class="hero">
+          <div class="hero-content"><span class="hero-overline">HEALTH JOURNAL · V0.1</span><h2 id="home-heading">身体的小变化<br>值得被认真记录。</h2><p>不必每天打卡。不舒服时随手记下，后续用药、观察和就医都可以接着补充。</p><button class="btn btn-white" data-nav="record">＋ 开始记录不适 <span aria-hidden="true">↗</span></button></div>
+          <div class="hero-art" aria-hidden="true"><div class="pulse pulse-a"></div><div class="pulse pulse-b"></div><div class="pulse pulse-c"></div><div class="pulse-heart">♥</div></div>
+        </div>
+        <div class="stats">
+          <div class="stat card"><span>健康事件</span><strong id="stat-events">1</strong><small>按一次健康问题归档</small></div>
+          <div class="stat card"><span>症状记录</span><strong id="stat-symptoms">2</strong><small>保留变化时间线</small></div>
+          <div class="stat card"><span>用药记录</span><strong id="stat-medication">1</strong><small>记录实际服用情况</small></div>
+        </div>
+        <div class="two-column">
+          <div class="card roomy"><div class="section-heading"><div><span class="eyebrow">RECENT EVENTS</span><h3>最近的健康事件</h3></div><button class="text-btn" data-nav="events">查看全部 →</button></div><div id="home-events"></div></div>
+          <div class="card roomy"><div class="section-heading"><div><span class="eyebrow">HOW IT WORKS</span><h3>三步完成一次记录</h3></div></div>
+            <div class="steps"><div class="step"><span>01</span><div><strong>选位置</strong><p>正反人体图定位，也可以不选择位置</p></div></div><div class="step"><span>02</span><div><strong>描述不适</strong><p>选择症状、程度和发生时间</p></div></div><div class="step"><span>03</span><div><strong>持续补充</strong><p>后续记录用药、变化及就医经过</p></div></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-record" aria-label="记录不适">
+        <div class="section-intro"><span class="eyebrow">NEW SYMPTOM</span><h2>哪里不舒服？</h2><p>先选位置，再描述感受。不确定位置也没关系，所有内容都可以之后补充。</p></div>
+        <div class="record-layout">
+          <div class="card body-card">
+            <div class="card-head"><div><h3>① 选择身体部位</h3><p>可以选择多个部位 · 点击区域高亮</p></div><button class="light-btn" id="clear-areas">清空选择</button></div>
+            <div class="segmented" role="group" aria-label="人体视角"><button id="switch-front" class="active" type="button">正面</button><button id="switch-back" type="button">背面</button></div>
+            <div class="body-stage"><svg id="body-svg" viewBox="0 0 320 500" role="img" aria-label="可交互人体部位示意图"></svg><span class="stage-label" id="body-side">正面视图</span></div>
+            <div class="zone-detail" id="zone-detail" aria-live="polite"><strong>点击人体区域，选择更具体的位置</strong><p>可选整体区域，或点击二级细分区域。</p></div>
+            <div class="field-group radiation-field"><label class="field-label">不适是否从一个位置延伸到另一个位置？ <span class="optional">选填 · 仅记录描述</span></label><div class="input-pair"><select id="radiate-from" class="field-input" aria-label="起始位置"><option value="">起始位置</option></select><select id="radiate-to" class="field-input" aria-label="延伸至"><option value="">延伸至</option></select></div><small class="helper">只记录本人描述的放射方向，不做病因判断。</small></div>
+            <div class="zone-summary"><strong>已选区域</strong><div id="selected-areas" class="area-tags"><span class="muted">尚未选择，可直接填写症状</span></div></div>
+            <button class="plain-choice" id="unlocated" type="button">◎ 全身不适 / 说不清具体位置</button>
+          </div>
+          <div class="card form-card">
+            <div class="card-head"><div><h3>② 记录症状</h3><p>尽可能记录真实感受，不必使用专业术语</p></div><span class="step-count">第 2 步 / 共 2 步</span></div>
+            <label class="field-label">不适类型 <span class="optional">可多选</span></label>
+            <div class="chips" id="symptom-chips">
+              <button type="button" data-symptom="疼痛">疼痛</button><button type="button" data-symptom="胀痛">胀痛</button><button type="button" data-symptom="刺痛">刺痛</button><button type="button" data-symptom="酸痛">酸痛</button><button type="button" data-symptom="麻木">麻木</button><button type="button" data-symptom="瘙痒">瘙痒</button><button type="button" data-symptom="恶心">恶心</button><button type="button" data-symptom="头晕">头晕</button><button type="button" data-symptom="乏力">乏力</button><button type="button" data-symptom="其他">其他</button>
+            </div>
+            <div class="field-group"><div class="label-between"><label for="severity">不适程度 <span class="optional">主观评分</span></label><strong><span id="severity-value">未评分</span></strong></div><input type="range" min="0" max="10" step="1" id="severity" value="5" disabled /><div class="range-label"><span>没有不适</span><span>最严重的不适</span></div><label class="inline-check"><input type="checkbox" id="severity-unknown" checked /> 无法评分 / 不适用</label></div>
+            <div class="field-group"><label class="field-label" for="symptom-onset">开始时间</label><input type="datetime-local" id="symptom-onset" class="field-input" /><small class="helper">可以补记过去发生的时间</small></div>
+            <div class="field-group"><label class="field-label" for="symptom-notes">补充说明 <span class="optional">选填</span></label><textarea id="symptom-notes" rows="3" class="field-input" placeholder="例如：走路时更明显，休息一会儿稍有缓解……"></textarea></div>
+            <div class="field-group"><label class="field-label" for="target-event">保存到哪个健康事件？</label><select class="field-input" id="target-event"><option value="new">＋ 新建健康事件</option></select></div>
+            <button class="btn btn-primary full-width" id="save-symptom" type="button">保存症状记录 <span aria-hidden="true">→</span></button>
+            <p class="form-footnote">保存不需要 AI 参与；不必为了获取分析而填写所有字段。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-events" aria-label="健康事件">
+        <div class="section-intro"><span class="eyebrow">HEALTH EVENTS</span><h2>把一次不适，记录成完整的经过。</h2><p>症状、服药、后续变化与就医资料都围绕同一次健康事件整理。</p></div>
+        <div class="events-layout"><div class="card event-list-card"><div class="section-heading"><h3>事件列表</h3><button class="light-btn" data-nav="record">＋ 新记录</button></div><div id="event-picker"></div></div>
+          <div class="card event-detail-card"><div id="event-detail"></div></div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-medication" aria-label="用药记录">
+        <div class="section-intro"><span class="eyebrow">MEDICATION LOG</span><h2>记录吃过什么药，而不是凭记忆回想。</h2><p>药名、实际服用时间与剂量由你填写并核对；这里不会计算或推荐用药剂量。</p></div>
+        <div class="two-column-med"><div class="card roomy">
+          <h3>新增用药记录</h3>
+          <div class="field-group"><label class="field-label" for="med-name">药物名称</label><input id="med-name" class="field-input" placeholder="例如：演示用药 A（请不要填写真实信息）" /></div>
+          <div class="field-group"><label class="field-label" for="med-dose">实际服用量及单位</label><div class="input-pair"><input id="med-dose" class="field-input" placeholder="例如：1" /><select id="med-unit" class="field-input" aria-label="剂量单位"><option value="片">片</option><option value="粒">粒</option><option value="mg">mg</option><option value="mL">mL</option><option value="其他">其他</option></select></div><small class="helper">不同规格药物不能仅根据“片数”自动换算剂量。</small></div>
+          <div class="field-group"><label class="field-label" for="med-time">实际服用时间</label><input id="med-time" class="field-input" type="datetime-local" /></div>
+          <div class="field-group"><label class="field-label" for="med-event">关联健康事件</label><select id="med-event" class="field-input"></select></div>
+          <div class="field-group"><label class="field-label" for="med-order">对应医生处方或用药医嘱 <span class="optional">选填</span></label><select id="med-order" class="field-input"><option value="">未关联 / 自行记录的实际用药</option></select></div>
+          <div id="med-item-block" class="field-group" hidden><label class="field-label" for="med-item">对应处方药品明细 <span class="optional">选填</span></label>
+            <select class="field-input" id="med-item"><option value="">只关联整张处方 / 无法确认是哪一项</option></select>
+            <small class="helper">不会依据处方明细自动生成实际服用记录，也不会推断是否按医嘱服药。</small>
+          </div>
+          <div class="field-group"><label class="field-label" for="med-note">用药后的感受 <span class="optional">选填</span></label><textarea id="med-note" class="field-input" rows="3" placeholder="只是记录自己的感觉，不代表药物疗效或不良反应已被确认"></textarea></div>
+          <button class="btn btn-primary full-width" id="save-med" type="button">保存实际用药记录 →</button>
+          <p class="form-footnote">药物识别、处方审核、相互作用分析均未在本原型中实现。</p>
+        </div><div class="card roomy"><div class="section-heading"><h3>已记录用药</h3><span class="subtle-note">仅虚构演示数据</span></div><div id="medication-list"></div></div></div>
+      </section>
+
+
+      <section class="screen" id="screen-care" aria-label="就医与医嘱记录">
+        <div class="section-intro"><span class="eyebrow">VISITS & CARE PLAN</span><h2>把医生说的、开具的，以及实际做过的分开记。</h2><p>就诊、医嘱/处方和治疗执行是三种不同事实；有医嘱不代表已经服药或完成治疗。</p></div>
+        <div class="care-tabs" role="group" aria-label="就医记录类型">
+          <button type="button" data-care-tab="visit" class="active">① 就医记录</button>
+          <button type="button" data-care-tab="order">② 医嘱 / 处方</button>
+          <button type="button" data-care-tab="treatment">③ 治疗执行</button>
+        </div>
+        <div class="care-layout">
+          <div class="card roomy">
+            <div class="field-group"><label for="care-event" class="field-label">关联健康事件</label><select id="care-event" class="field-input"></select></div>
+            <div class="care-form active" id="care-visit-form">
+              <h3>记录一次就医</h3>
+              <div class="field-group"><label for="visit-date" class="field-label">就诊时间</label><input id="visit-date" type="datetime-local" class="field-input"></div>
+              <div class="field-group"><label for="visit-hospital" class="field-label">医院 / 机构 <span class="optional">可不填</span></label><input id="visit-hospital" class="field-input" placeholder="虚构医疗机构"></div>
+              <div class="field-group"><label for="visit-dept" class="field-label">科室 / 医生 <span class="optional">可不填</span></label><input id="visit-dept" class="field-input" placeholder="如：演示科室"></div>
+              <div class="field-group"><label for="visit-followup" class="field-label">对应复诊计划 <span class="optional">选填</span></label><select id="visit-followup" class="field-input"><option value="">本次就诊未关联复诊计划</option></select></div>
+              <div class="field-group"><label for="visit-note" class="field-label">医生意见 / 诊断原文（用户转录）</label><textarea id="visit-note" class="field-input" rows="4" placeholder="请记录医生的实际说明；无法确认的内容不要猜测"></textarea></div>
+              <button type="button" id="save-visit" class="btn btn-primary full-width">保存就医记录</button>
+            </div>
+            <div class="care-form" id="care-order-form">
+              <h3>记录医生开具的医嘱或处方</h3>
+              <div class="field-group"><label for="order-visit" class="field-label">来源就诊记录 <span class="optional">选填</span></label><select id="order-visit" class="field-input"><option value="">未关联具体就诊</option></select></div>
+              <div class="field-group"><label for="order-type" class="field-label">医嘱类型</label><select id="order-type" class="field-input"><option value="prescription">处方 / 用药医嘱</option><option value="treatment">治疗建议</option><option value="test">检查建议</option><option value="followup">复诊 / 复查</option><option value="lifestyle">生活方式注意事项</option><option value="other">其他医嘱</option></select></div>
+              <div class="field-group"><label for="order-time" class="field-label">开具 / 告知时间</label><input id="order-time" type="datetime-local" class="field-input"></div>
+              <div class="field-group"><label for="order-text" class="field-label">医嘱原文或患者记忆内容</label><textarea id="order-text" class="field-input" rows="4" placeholder="示例：演示处方中的药名、规格、剂量、频次和疗程（仅记录，不提供建议）"></textarea></div>
+              <div class="rx-section" id="rx-section">
+                <div class="rx-heading"><strong>处方药品明细 <span class="optional">逐药录入 · 至多5项</span></strong><button type="button" id="add-rx-item" class="light-btn">＋ 增加药品</button></div>
+                <div id="rx-items"></div>
+                <p class="helper">只记录原处方明确的信息；药品规格、剂量、频次、疗程可以留空，系统不会猜测或计算。</p>
+              </div>
+              <div class="field-group" id="followup-field" hidden><label for="order-due" class="field-label">医生建议的复诊 / 复查日期 <span class="optional">选填</span></label><input type="date" id="order-due" class="field-input"></div>
+              <div class="field-group"><label for="order-photo" class="field-label">拍摄或选择处方图片 <span class="optional">可选 · 本地预览，不上传</span></label>
+                <input id="order-photo" type="file" accept="image/*,.pdf,application/pdf" class="field-input">
+                <div id="order-photo-preview" class="photo-preview"><span>尚未选择图片。原型不具备 OCR，不会读取处方生成医嘱。</span></div>
+                <small class="helper">只允许使用虚构材料体验。原型不会保存照片，刷新后需重新选择。</small>
+              </div>
+              <div class="field-group"><label for="order-supersedes" class="field-label">是否替代或更改此前医嘱？ <span class="optional">选填</span></label>
+                <select id="order-supersedes" class="field-input"><option value="">新增医嘱（不替代旧医嘱）</option></select>
+                <small class="helper">建立新旧医嘱关系，不会改写原医嘱；建议在原文中保留变更说明。</small>
+              </div>
+              <div class="field-group"><label for="order-source" class="field-label">信息来源</label><select id="order-source" class="field-input"><option value="self">用户转录 / 回忆（待核实）</option><option value="document">依据医生纸质/电子文书手工录入（仍需核实）</option></select></div>
+              <div class="field-group"><label for="order-status" class="field-label">执行情况（仅本人标记）</label><select id="order-status" class="field-input"><option value="unknown">尚未确认</option><option value="not_started">未执行</option><option value="in_progress">执行中</option><option value="completed">报告已执行（需独立执行记录支持）</option></select></div>
+              <button type="button" id="save-order" class="btn btn-primary full-width">保存医嘱 / 处方记录</button>
+              <p class="form-footnote">此处仅原样记录，不自动转换成实际服药或治疗完成事实。</p>
+            </div>
+            <div class="care-form" id="care-treatment-form">
+              <h3>记录实际进行的治疗</h3>
+              <div class="field-group"><label for="treatment-order" class="field-label">关联医生治疗医嘱 <span class="optional">选填</span></label><select id="treatment-order" class="field-input"><option value="">未关联具体医嘱</option></select></div>
+              <div class="field-group"><label for="treatment-time" class="field-label">治疗实际发生时间</label><input id="treatment-time" type="datetime-local" class="field-input"></div>
+              <div class="field-group"><label for="treatment-name" class="field-label">实际治疗项目</label><input id="treatment-name" class="field-input" placeholder="虚构治疗项目，如物理治疗"></div>
+              <div class="field-group"><label for="treatment-detail" class="field-label">实施情况与治疗后感受 <span class="optional">选填</span></label><textarea id="treatment-detail" class="field-input" rows="4" placeholder="例：执行地点、次数、过程、当时的感觉（用户自述）"></textarea></div>
+              <button type="button" id="save-treatment" class="btn btn-primary full-width">保存实际治疗记录</button>
+            </div>
+          </div>
+          <div class="card roomy"><div class="section-heading"><h3>就医与治疗记录</h3><span class="subtle-note">记录事实，不作医学核验</span></div>
+          <div id="followup-overview" class="followup-overview"></div>
+          <div id="order-comparison" class="order-comparison"></div>
+          <div id="care-list"></div></div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-ai" aria-label="AI 辅助问询演示">
+        <div class="section-intro"><span class="eyebrow">ASSISTED REVIEW</span><h2>AI 帮你整理线索，不替你下诊断。</h2><p>这里演示可能的问询体验。尚未连接大模型，也没有通过医学审核的自动风险分级。</p></div>
+        <div class="ai-warning"><strong>重要安全说明</strong><p>此页面不是医疗建议。演示答案不会产生任何真实疾病结论或风险等级。如出现严重胸痛、明显呼吸困难、突发单侧无力等紧急情况，应立即联系当地急救服务。</p></div>
+        <div class="ai-layout"><div class="card roomy"><div class="field-group"><label for="qa-event" class="field-label">选择演示事件（根据记录选择不同问题）</label><select id="qa-event" class="field-input"></select></div><div class="ai-head"><span class="ai-bubble">✧</span><div><strong>智能补充问询 · 演示</strong><p>从当前事件的记录中挑选几个有助于描述病情的问题</p></div></div><div id="qa-panel"></div></div>
+          <div class="card roomy"><h3>为什么这样设计？</h3><div class="principles"><div><span class="principle-index">01</span><p><strong>先识别紧急信号</strong><br>经审核的危险信号规则应先于语言模型运行。</p></div><div><span class="principle-index">02</span><p><strong>允许“不清楚”</strong><br>信息不足不应被自动解释为低风险。</p></div><div><span class="principle-index">03</span><p><strong>所有结论可追溯</strong><br>记录事实与 AI 提示必须明确区分。</p></div></div><button class="btn btn-outline full-width" id="show-alert-demo">查看紧急风险提示的样式示例</button><small class="helper">点击仅展示通用模板，不针对本次记录作医疗判断。</small></div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-report" aria-label="就医报告">
+        <div class="section-intro"><span class="eyebrow">VISIT SUMMARY</span><h2>就医前后，持续完善同一份健康档案。</h2><p>就医前重点呈现症状和已服药物；就医后增加就诊记录、医生医嘱/处方、实际治疗及用药执行情况。</p></div>
+        <div class="report-toolbar"><div><label for="report-event">选择健康事件</label><select id="report-event" class="field-input"></select></div><div><label for="report-mode">报告视图</label><select id="report-mode" class="field-input"><option value="previsit">就医前摘要（给医生看）</option><option value="followup">就医与治疗全程档案</option></select></div><label class="inline-check"><input type="checkbox" id="report-ai" /> 附加 AI 功能说明</label><div class="report-actions"><button class="btn btn-outline" id="copy-report">复制文字</button><button class="btn btn-primary" id="print-report">打印 / 保存 PDF</button></div></div>
+        <article class="report-page" id="report-page" aria-label="健康事件报告预览"><div id="report-content"></div></article>
+        <div class="report-disclaimer">报告为用户自述及虚构演示资料的整理，不构成诊断。正式产品需要支持逐条核对原始数据与来源。</div>
+      </section>
+    </main>
+  </div>
+  <nav class="mobile-nav" aria-label="移动端导航"><button class="active" data-nav="home"><span>⌂</span>首页</button><button data-nav="record"><span>◎</span>记录</button><button data-nav="events"><span>☷</span>事件</button><button data-nav="ai"><span>✧</span>AI</button><button data-nav="report"><span>▤</span>报告</button></nav>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="modal-backdrop" id="emergency-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden><div class="modal-card"><span class="modal-symbol">!</span><h3 id="modal-title">紧急风险提示 · 界面模板</h3><p><strong>这是虚构设计示例，不是根据您的数据作出的判断。</strong></p><p>真实产品在经过医学审核的危险信号规则触发时，应立即展示清晰的求助行动提示，不能等待 AI 回复，也不能让 AI 降低规则提示级别。</p><p>如实际出现明显危急症状，请立即联系当地急救服务。</p><button class="btn btn-primary full-width" id="close-modal">关闭示例</button></div></div>
+  <script>
+/* Health V0.1 browser-only interactive prototype.
+   All data is fictitious. No persistence, backend, telemetry, or real AI. */
+(function () {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const esc = (value) => String(value == null ? "" : value).replace(/[&<>"']/g, function (ch) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+  });
+  const example = {
+    id: "demo-e1", title: "腹部不适（虚构示例）", start: "2026-11-15T08:30",
+    status: "进行中", entries: [
+      { id: "demo-s1", kind: "symptom", when: "2026-11-15T08:30", zones: [{ key: "front:upper-abd", label: "上腹部" }], symptoms: ["胀痛", "恶心"], severity: 6, notes: "上午开始感觉腹部胀痛，伴轻微恶心。（虚构）" },
+      { id: "demo-m1", kind: "med", when: "2026-11-15T09:10", name: "演示药品 A（虚构）", dose: "1", unit: "片", notes: "记录一次实际用药；不代表任何用药建议。" },
+      { id: "demo-s2", kind: "symptom", when: "2026-11-15T11:30", zones: [{ key: "front:upper-abd", label: "上腹部" }], symptoms: ["胀痛"], severity: 3, notes: "主观不适程度有所减轻。（虚构）" },
+      { id: "demo-v1", kind: "visit", when: "2026-11-16T10:00", hospital: "演示医疗机构（虚构）", department: "演示门诊", notes: "医生具体意见由患者转录，待与正式医疗文书核对。（虚构）" },
+      { id: "demo-o1", kind: "order", when: "2026-11-16T10:20", visitId: "demo-v1", orderType: "followup", text: "示例：医生建议复诊时带上此前的检查记录（完全虚构）", dueDate:"2026-11-25", sourceType: "self", executionStatus: "unknown" },
+      { id: "demo-o-old", kind:"order",when:"2026-11-16T10:23",visitId:"demo-v1",orderType:"prescription",text:"虚构的处方记录（旧版）",sourceType:"self",executionStatus:"unknown",
+        items:[{id:"demo-p-old",name:"虚构药品甲",strength:"未记录",doseText:"未记录",frequency:"未记录",duration:"未记录"}] },
+      { id: "demo-o-new", kind:"order",when:"2026-11-16T10:28",visitId:"demo-v1",orderType:"prescription",text:"虚构处方的新版本，仅用于演示变更历史",supersedes:"demo-o-old",sourceType:"document",executionStatus:"unknown",
+        items:[{id:"demo-p1",name:"虚构药品甲",strength:"未记录",doseText:"未记录",frequency:"未记录",duration:"未记录"},{id:"demo-p2",name:"虚构药品乙",strength:"未记录",doseText:"未记录",frequency:"未记录",duration:"未记录"}] },
+      {id:"demo-m2",kind:"med",when:"2026-11-16T12:00",name:"虚构药品甲",dose:"1",unit:"片",notes:"完全虚构的实际服用记录。",orderId:"demo-o-new",itemId:"demo-p1"},
+      { id: "demo-t1", kind: "treatment", when: "2026-11-16T10:45", name: "虚构的门诊处理项目", details: "仅用于展示治疗执行与医嘱分开的记录方式。", orderId: "" }
+    ]
+  };
+  let state = {
+    events: [JSON.parse(JSON.stringify(example))],
+    currentEventId: "demo-e1", view: "home", bodyView: "front",
+    zones: new Map(), activeZone: null, radiationFrom: "", radiationTo: "", unlocated: false, symptoms: new Set(), qaIndex: 0, qaAnswers: [],
+    reportIncludeAI: false
+  };
+  const routes = {
+    home: ["首页概览", "让每一次身体变化，都有迹可循", "记录当下的不适，为下一次就医留下清楚的线索。"],
+    record: ["记录不适", "记录身体发出的信号", "选择部位、描述感受、留下发生时间。"],
+    events: ["健康事件", "把零散信息，连接成一段清晰的经过", "从第一次不舒服，到用药和恢复变化。"],
+    medication: ["用药记录", "实际服用了什么，记得清清楚楚", "坚持记录事实，避免自动猜测剂量和效果。"],
+    care: ["就医与医嘱", "把医生的要求和实际治疗记录清楚", "就诊、处方/医嘱、实际治疗分开登记，避免混淆。"],
+    ai: ["AI 辅助", "更有条理地描述身体情况", "演示引导问询体验，未提供真实医学分诊。"],
+    report: ["就医报告", "就医之前，把重要信息准备好", "可追溯的健康事件摘要与实际用药时间线。"]
+  };
+  const silhouettes = [
+    '<ellipse class="body-outline" cx="160" cy="58" rx="27" ry="35"/>',
+    '<path class="body-outline" d="M149 89 L171 89 L177 109 L143 109 Z"/>',
+    '<path class="body-outline" d="M126 108 Q116 119 114 152 L123 268 Q125 289 160 288 Q195 289 197 268 L206 152 Q204 119 194 108 Z"/>',
+    '<path class="body-outline" d="M125 111 L103 116 Q91 120 85 144 L60 226 Q58 235 73 241 Q82 241 86 229 L111 169 L128 148 Z"/>',
+    '<path class="body-outline" d="M195 111 L217 116 Q229 120 235 144 L260 226 Q262 235 247 241 Q238 241 234 229 L209 169 L192 148 Z"/>',
+    '<path class="body-outline" d="M126 274 L159 280 L157 371 L149 457 Q147 479 133 477 L121 468 L120 368 Z"/>',
+    '<path class="body-outline" d="M194 274 L161 280 L163 371 L171 457 Q173 479 187 477 L199 468 L200 368 Z"/>'
+  ].join("");
+  // Anatomical left/right are from the person's perspective (viewer perspective is reversed).
+  const zonesFront = [
+    ["head", "头部", "M160 25 C177 25 187 42 186 60 C185 77 175 89 160 90 C145 89 135 77 134 60 C133 42 143 25 160 25Z"],
+    ["neck", "颈前", "M150 91 L170 91 L175 111 L145 111Z"],
+    ["shoulder-right", "右肩", "M125 111 L103 119 L94 140 L117 149 L130 130Z"],
+    ["shoulder-left", "左肩", "M195 111 L217 119 L226 140 L203 149 L190 130Z"],
+    ["chest-right", "右胸", "M128 112 L158 112 L158 162 L120 162 L118 146Z"],
+    ["chest-left", "左胸", "M162 112 L192 112 L202 146 L200 162 L162 162Z"],
+    ["upper-abd", "上腹部", "M121 166 L199 166 L195 203 L125 203Z"],
+    ["navel", "脐周", "M126 207 L194 207 L193 240 L127 240Z"],
+    ["lower-abd-right", "右下腹", "M128 244 L158 244 L158 284 L125 271Z"],
+    ["lower-abd-left", "左下腹", "M162 244 L192 244 L195 271 L162 284Z"],
+    ["arm-right", "右上肢", "M92 145 L111 154 L85 226 L64 225Z"],
+    ["arm-left", "左上肢", "M228 145 L209 154 L235 226 L256 225Z"],
+    ["hand-right", "右手", "M63 228 L83 232 L76 252 Q66 265 57 248Z"],
+    ["hand-left", "左手", "M257 228 L237 232 L244 252 Q254 265 263 248Z"],
+    ["thigh-right", "右大腿", "M127 283 L156 288 L154 372 L122 371Z"],
+    ["thigh-left", "左大腿", "M193 283 L164 288 L166 372 L198 371Z"],
+    ["calf-right", "右小腿", "M123 375 L153 375 L147 460 L124 463Z"],
+    ["calf-left", "左小腿", "M197 375 L167 375 L173 460 L196 463Z"]
+  ];
+  const zonesBack = [
+    ["head-back", "后脑", "M160 25 C177 25 187 42 186 60 C185 77 175 89 160 90 C145 89 135 77 134 60 C133 42 143 25 160 25Z"],
+    ["neck-back", "后颈", "M150 91 L170 91 L175 111 L145 111Z"],
+    ["shoulder-right-back", "右肩背", "M125 111 L103 119 L94 140 L117 149 L130 130Z"],
+    ["shoulder-left-back", "左肩背", "M195 111 L217 119 L226 140 L203 149 L190 130Z"],
+    ["upper-back-right", "右上背", "M128 112 L158 112 L158 184 L120 184 L118 146Z"],
+    ["upper-back-left", "左上背", "M162 112 L192 112 L202 146 L200 184 L162 184Z"],
+    ["lumbar-right", "右腰背", "M124 188 L158 188 L158 271 L125 271Z"],
+    ["lumbar-left", "左腰背", "M162 188 L196 188 L195 271 L162 271Z"],
+    ["arm-right-back", "右上肢背侧", "M92 145 L111 154 L85 226 L64 225Z"],
+    ["arm-left-back", "左上肢背侧", "M228 145 L209 154 L235 226 L256 225Z"],
+    ["hand-right-back", "右手背", "M63 228 L83 232 L76 252 Q66 265 57 248Z"],
+    ["hand-left-back", "左手背", "M257 228 L237 232 L244 252 Q254 265 263 248Z"],
+    ["thigh-right-back", "右大腿后侧", "M127 283 L156 288 L154 372 L122 371Z"],
+    ["thigh-left-back", "左大腿后侧", "M193 283 L164 288 L166 372 L198 371Z"],
+    ["calf-right-back", "右小腿后侧", "M123 375 L153 375 L147 460 L124 463Z"],
+    ["calf-left-back", "左小腿后侧", "M197 375 L167 375 L173 460 L196 463Z"]
+  ];
+  function bodyMarkup(view, selected, interactive) {
+    const shapes = (view === "front" ? zonesFront : zonesBack).map(function (z) {
+      const key = view + ":" + z[0];
+      const active = selected.has(key) || Array.from(selected.keys()).some(function (v) { return v.startsWith(key + "|"); });
+      const accessible = interactive ? ' role="button" tabindex="0" data-zone="' + esc(key) + '" aria-pressed="' + active + '"' : "";
+      return '<path class="body-zone' + (active ? ' selected' : '') + '" d="' + z[2] + '"' + accessible + '><title>' + esc(z[1]) + '</title></path>';
+    }).join("");
+    return '<g>' + silhouettes + shapes + '</g>' +
+      '<text x="160" y="495" text-anchor="middle" class="zone-mini-label">示意图仅用于描述症状位置，并非器官诊断</text>';
+  }
+  function currentEvent() {
+    return state.events.find(function (e) { return e.id === state.currentEventId; }) || state.events[0];
+  }
+  function eventById(id) { return state.events.find(function (e) { return e.id === id; }); }
+  function fmt(dt) {
+    if (!dt) return "时间未填写";
+    const d = new Date(dt);
+    return Number.isNaN(+d) ? esc(dt) : d.toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false });
+  }
+  function dayFmt(dt) {
+    if (!dt) return "未知日期";
+    const d = new Date(dt);
+    return Number.isNaN(+d) ? esc(dt) : d.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" });
+  }
+  function currentLocal() {
+    const d = new Date();
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  }
+  let toastHandle;
+  function notify(message) {
+    const el = $("toast"); el.textContent = message; el.classList.add("show");
+    clearTimeout(toastHandle); toastHandle = setTimeout(function () { el.classList.remove("show"); }, 2700);
+  }
+  function go(page) {
+    if (!routes[page]) return;
+    state.view = page;
+    document.querySelectorAll(".screen").forEach(function (el) { el.classList.toggle("active", el.id === "screen-" + page); });
+    document.querySelectorAll("[data-nav]").forEach(function (btn) { btn.classList.toggle("active", btn.dataset.nav === page); });
+    $("crumb").textContent = routes[page][0];
+    $("page-title").textContent = routes[page][1];
+    $("page-subtitle").textContent = routes[page][2];
+    if (page === "report") renderReport();
+    if (page === "ai") renderQA();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  const zoneDetails = {
+    "front:head": ["前额", "头顶", "左太阳穴", "右太阳穴", "面部"],
+    "front:neck": ["颈前正中", "左颈侧", "右颈侧"],
+    "front:chest-right": ["右胸前", "右胸侧", "右胸骨旁"],
+    "front:chest-left": ["左胸前", "左胸侧", "左胸骨旁"],
+    "front:upper-abd": ["上腹正中", "左上腹", "右上腹"],
+    "front:navel": ["脐周正中", "脐周左侧", "脐周右侧"],
+    "front:lower-abd-left": ["左下腹靠近肚脐", "左下腹靠近髋部"],
+    "front:lower-abd-right": ["右下腹靠近肚脐", "右下腹靠近髋部"],
+    "back:head-back": ["后枕部", "左后脑", "右后脑"],
+    "back:upper-back-left": ["左肩胛骨区", "左肩胛骨内侧"],
+    "back:upper-back-right": ["右肩胛骨区", "右肩胛骨内侧"],
+    "back:lumbar-left": ["左腰", "左侧腰背"],
+    "back:lumbar-right": ["右腰", "右侧腰背"]
+  };
+  function zoneLabel(key) {
+    const [view, id] = key.split(":");
+    const z = (view === "back" ? zonesBack : zonesFront).find(function (v) { return v[0] === id; });
+    return z ? z[1] : key;
+  }
+  function renderZoneDetail() {
+    const target = $("zone-detail");
+    const key = state.activeZone;
+    if (!key) {
+      target.innerHTML = '<strong>点击人体区域，选择更具体的位置</strong><p>可选整体区域，或点击二级细分区域；未标记位置也能记录。</p>'; return;
+    }
+    const label = zoneLabel(key), subs = zoneDetails[key] || [];
+    target.innerHTML = '<strong>当前部位：' + esc(label) + '</strong><p>可直接使用整体区域；也可以选择一项或多项更细位置。</p>' +
+      '<div class="detail-options"><button type="button" class="detail-chip' + (state.zones.has(key) ? ' selected' : '') +
+      '" data-zone-detail="whole">整体：' + esc(label) + '</button>' +
+      subs.map(function (part,i) {
+        const id = key + "|" + i;
+        return '<button type="button" class="detail-chip' + (state.zones.has(id) ? ' selected' : '') +
+        '" data-zone-detail="' + i + '">' + esc(part) + '</button>';
+      }).join("") + '</div>';
+  }
+  function renderRadiation() {
+    const choices = Array.from(state.zones.entries());
+    const opts = '<option value="">未选择</option>' + choices.map(function (pair) { return '<option value="' + esc(pair[0]) + '">' + esc(pair[1]) + '</option>'; }).join("");
+    ["radiate-from","radiate-to"].forEach(function (name) {
+      const el = $(name);
+      const value = name === "radiate-from" ? state.radiationFrom : state.radiationTo;
+      el.innerHTML = opts; el.value = state.zones.has(value) ? value : "";
+    });
+    if (!state.zones.has(state.radiationFrom)) state.radiationFrom = "";
+    if (!state.zones.has(state.radiationTo)) state.radiationTo = "";
+  }
+  function renderBody() {
+    $("body-svg").innerHTML = bodyMarkup(state.bodyView, state.zones, true);
+    $("body-side").textContent = state.bodyView === "front" ? "正面视图" : "背面视图";
+    $("switch-front").classList.toggle("active", state.bodyView === "front");
+    $("switch-back").classList.toggle("active", state.bodyView === "back");
+    const sel = Array.from(state.zones.entries());
+    $("selected-areas").innerHTML = sel.length ? sel.map(function (pair) {
+      return '<button type="button" class="area-tag" data-remove-zone="' + esc(pair[0]) + '">' + esc(pair[1]) + ' ×</button>';
+    }).join("") : '<span class="muted">' + (state.unlocated ? "已选择：全身 / 不明确位置" : "尚未选择，可直接填写症状") + '</span>';
+    $("unlocated").classList.toggle("active", state.unlocated);
+    renderZoneDetail(); renderRadiation();
+  }
+  function renderChips() {
+    document.querySelectorAll("#symptom-chips [data-symptom]").forEach(function (button) {
+      button.classList.toggle("selected", state.symptoms.has(button.dataset.symptom));
+      button.setAttribute("aria-pressed", String(state.symptoms.has(button.dataset.symptom)));
+    });
+  }
+  function renderStats() {
+    $("stat-events").textContent = state.events.length;
+    $("stat-symptoms").textContent = state.events.reduce(function (n, e) { return n + e.entries.filter(function (x) { return x.kind === "symptom"; }).length; }, 0);
+    $("stat-medication").textContent = state.events.reduce(function (n, e) { return n + e.entries.filter(function (x) { return x.kind === "med"; }).length; }, 0);
+  }
+  function renderHome() {
+    $("home-events").innerHTML = state.events.slice().reverse().map(function (e) {
+      return '<div class="event-preview" role="button" tabindex="0" data-event="' + esc(e.id) + '"><div class="event-preview-head"><h4>' + esc(e.title) + '</h4><span class="status-pill">' + esc(e.status) + '</span></div>' +
+        '<p>' + e.entries.length + ' 条记录 · ' + e.entries.filter(function (x) { return x.kind === "med"; }).length + ' 条用药记录</p><small>开始于 ' + dayFmt(e.start) + '</small></div>';
+    }).join("");
+  }
+  function populateEventSelects() {
+    const options = state.events.map(function (e) { return '<option value="' + esc(e.id) + '">' + esc(e.title) + '</option>'; }).join("");
+    const r = $("target-event"), m = $("med-event"), p = $("report-event");
+    const rv = r.value || "new";
+    r.innerHTML = '<option value="new">＋ 新建健康事件</option>' + options;
+    r.value = rv === "new" || eventById(rv) ? rv : "new";
+    m.innerHTML = options; p.innerHTML = options;
+    $("care-event").innerHTML = options;
+    $("qa-event").innerHTML = options;
+    m.value = state.currentEventId; p.value = state.currentEventId;
+    $("care-event").value = state.currentEventId;
+    $("qa-event").value = state.currentEventId;
+    renderLinkedChoices();
+  }
+  const orderNames = { prescription:"处方 / 用药医嘱", treatment:"治疗建议",test:"检查建议",followup:"复诊 / 复查", lifestyle:"生活方式注意事项", other:"其他医嘱" };
+  const executionNames = {unknown:"尚未确认", not_started:"未执行", in_progress:"执行中", completed:"用户报告已执行（需核对执行记录）"};
+  function entryTitle(entry) {
+    if (entry.kind === "visit") return "就医：" + (entry.hospital || "机构未记录") + (entry.department ? " · "+entry.department : "");
+    if (entry.kind === "order") return "医生医嘱（转录）：" + (orderNames[entry.orderType] || "其他医嘱");
+    if (entry.kind === "treatment") return "实际治疗：" + entry.name;
+    if (entry.kind === "med") return "服用：" + entry.name + " · " + entry.dose + entry.unit;
+    const types = (entry.symptoms || []).join("、") || "未分类症状";
+    const area = (entry.zones || []).map(function (x) { return x.label; }).join("、") || (entry.unlocated ? "全身 / 位置不明" : "位置未注明");
+    return area + " · " + types;
+  }
+  function entryDescription(entry) {
+    if (entry.kind === "visit") return entry.notes || "就医信息由用户录入，需与原始医疗文书核对";
+    if (entry.kind === "order") return (entry.text || "医嘱内容未填写") +
+      (entry.items && entry.items.length ? " · 药品明细："+entry.items.map(function(x){return x.name;}).join("、") : "") +
+      (entry.dueDate ? " · 计划日期："+entry.dueDate : "")+
+      (entry.supersedes ? " · 替代了先前医嘱（保留历史）":"")+
+      " · " + (entry.sourceType === "document" ? "用户根据文书转录，未验证原件" : "用户回忆，待核实") +
+      " · " + (executionNames[entry.executionStatus] || "尚未确认");
+    if (entry.kind === "treatment") return entry.details || "用户记录实际发生的治疗";
+    if (entry.kind === "med") return (entry.notes || "实际用药记录（由用户确认）") + (entry.orderId ? " · 已关联处方记录" : " · 未关联处方") + (entry.itemId ? " · 已关联具体药品" : "");
+    return (entry.severity == null ? "不适程度未评分" : "不适程度 " + entry.severity + "/10") +
+      (entry.radiation ? " · 从" + entry.radiation.from + "延伸至" + entry.radiation.to : "") +
+      (entry.notes ? " · " + entry.notes : "");
+  }
+  function renderEvents() {
+    $("event-picker").innerHTML = state.events.slice().reverse().map(function (e) {
+      return '<button type="button" class="event-choice' + (e.id === state.currentEventId ? ' selected' : '') + '" data-event="' + esc(e.id) + '"><strong>' + esc(e.title) + '</strong><small>' + dayFmt(e.start) + ' · ' + e.entries.length + ' 条记录 · ' + esc(e.status) + '</small></button>';
+    }).join("");
+    const e = currentEvent();
+    if (!e) { $("event-detail").innerHTML = '<div class="empty">还没有健康事件</div>'; return; }
+    const sorted = e.entries.slice().sort(function (a, b) { return new Date(a.when) - new Date(b.when); });
+    const timeline = sorted.map(function (en) {
+      const type = en.kind === "med" ? "实际用药" : en.kind === "visit" ? "就医" : en.kind === "order" ? "医嘱/处方" : en.kind === "treatment" ? "实际治疗" : "症状";
+      return '<div class="timeline-item' + (en.kind === "med" ? ' med' : '') + '"><span class="timeline-dot"></span><small>' + fmt(en.when) + ' · ' + type + ' · 用户录入（未核实）</small><strong>' +
+        esc(entryTitle(en)) + '</strong><p>' + esc(entryDescription(en)) + '</p></div>';
+    }).join("");
+    $("event-detail").innerHTML = '<div class="detail-top"><div><h3>' + esc(e.title) + '</h3><p>' + dayFmt(e.start) + ' 开始 · ' + e.entries.length + ' 条记录</p></div><span class="status-pill">' + esc(e.status) + '</span></div>' +
+      '<div class="detail-actions"><button type="button" class="light-btn" data-nav="record">＋ 记录新症状</button><button type="button" class="light-btn" data-nav="medication">＋ 记录用药</button><button type="button" class="light-btn" data-nav="care">＋ 就医/医嘱/治疗</button><button type="button" class="light-btn" id="open-report">查看报告</button><button type="button" class="light-btn" id="toggle-event">' + (e.status === "进行中" ? "标记已结束" : "重新开启") + '</button></div>' +
+      '<h3 style="font-size:15px;margin:25px 0 12px">事件时间线</h3><div class="timeline">' + (timeline || '<div class="empty">还没有记录</div>') + '</div>';
+  }
+
+  function selectOptions(entries, placeholder, caption) {
+    return '<option value="">' + placeholder + '</option>' + entries.map(function (en) {
+      return '<option value="' + esc(en.id) + '">' + esc(fmt(en.when) + " · " + caption(en)) + '</option>';
+    }).join("");
+  }
+
+  // Each structured item is a transcription only, never a prescribing action.
+  let rxCounter=0, photoUrl=null;
+  function getRxItems(){
+    return Array.from(document.querySelectorAll("#rx-items .rx-item")).map(function(row){
+      const value=function(sel){return row.querySelector(sel).value.trim();};
+      return {id:row.dataset.rxId,name:value(".rx-name"),strength:value(".rx-strength"),
+        doseText:value(".rx-dose"),frequency:value(".rx-frequency"),duration:value(".rx-duration")};
+    });
+  }
+  function renderRxItems(items){
+    $("rx-items").innerHTML=items.map(function(item,i){
+      const val=function(key){return esc(item[key]||"");};
+      return '<div class="rx-item" data-rx-id="'+esc(item.id)+'">'+
+        '<div class="rx-item-top"><strong>处方药品 '+(i+1)+'</strong><button type="button" class="light-btn" data-remove-rx="'+esc(item.id)+'">移除</button></div>'+
+        '<label class="field-label">药品名称</label><input class="field-input rx-name" value="'+val("name")+'" placeholder="虚构药品名">'+
+        '<div class="rx-grid">'+
+        '<div><label class="field-label">规格原文</label><input class="field-input rx-strength" value="'+val("strength")+'" placeholder="可不填"></div>'+
+        '<div><label class="field-label">单次用量原文</label><input class="field-input rx-dose" value="'+val("doseText")+'" placeholder="可不填"></div>'+
+        '<div><label class="field-label">频次原文</label><input class="field-input rx-frequency" value="'+val("frequency")+'" placeholder="可不填"></div>'+
+        '<div><label class="field-label">疗程原文</label><input class="field-input rx-duration" value="'+val("duration")+'" placeholder="可不填"></div></div></div>';
+    }).join("");
+  }
+  function addRx(){
+    const items=getRxItems();
+    if(items.length>=5){notify("原型最多演示5项，正式版另行评估");return;}
+    items.push({id:"rx-"+(++rxCounter),name:"",strength:"",doseText:"",frequency:"",duration:""});
+    renderRxItems(items);
+  }
+  function showOrderFields(){
+    $("rx-section").hidden=$("order-type").value!=="prescription";
+    $("followup-field").hidden=$("order-type").value!=="followup";
+  }
+  function renderMedItems(){
+    const e=eventById($("med-event").value)||currentEvent();
+    const o=e && e.entries.find(function(a){return a.id===$("med-order").value&&a.kind==="order";});
+    const items=o&&o.items||[];
+    $("med-item-block").hidden=!items.length;
+    $("med-item").innerHTML='<option value="">仅关联整张处方 / 不确定哪一项</option>'+
+      items.map(function(item){return '<option value="'+esc(item.id)+'">'+esc(item.name)+'</option>';}).join("");
+  }
+  function showLocalPhoto(){
+    if(photoUrl){URL.revokeObjectURL(photoUrl);photoUrl=null;}
+    const f=$("order-photo").files[0],box=$("order-photo-preview");
+    box.replaceChildren();
+    if(!f){box.textContent="尚未选择图片；无 OCR，不上传、不保存。";return;}
+    if(f.size>8*1024*1024 || !(f.type.startsWith("image/")||f.type==="application/pdf")){
+      $("order-photo").value="";box.textContent="仅限 8MB 以下的图片/PDF 虚构测试文件。";return;
+    }
+    const p=document.createElement("p");p.textContent="仅本地预览："+f.name+"；不上传、不随记录保存、无 OCR。";box.appendChild(p);
+    if(f.type.startsWith("image/")){
+      photoUrl=URL.createObjectURL(f);
+      const img=document.createElement("img");img.src=photoUrl;img.alt="本地虚构处方图片预览";box.appendChild(img);
+    }
+  }
+  function clearLocalPhoto(){
+    if(photoUrl){URL.revokeObjectURL(photoUrl);photoUrl=null;}
+    $("order-photo").value="";$("order-photo-preview").textContent="未保存原件；可重新选择本地图片。";
+  }
+  function renderLinkedChoices() {
+    const careEvent = eventById($("care-event").value) || currentEvent();
+    const medEvent = eventById($("med-event").value) || currentEvent();
+    if (careEvent) {
+      $("order-visit").innerHTML = selectOptions(careEvent.entries.filter(function (e) { return e.kind === "visit"; }), "未关联具体就诊", function(e) {return e.hospital||"就医";});
+      $("treatment-order").innerHTML = selectOptions(careEvent.entries.filter(function (e) { return e.kind === "order" && e.orderType === "treatment"; }), "未关联治疗医嘱", function(e) {return e.text || "治疗建议";});
+      $("order-supersedes").innerHTML=selectOptions(careEvent.entries.filter(function(e){return e.kind==="order";}),"新增医嘱（不替代旧医嘱）",function(e){return e.text.slice(0,36);});
+      $("visit-followup").innerHTML=selectOptions(careEvent.entries.filter(function(e){return e.kind==="order"&&e.orderType==="followup";}),"本次就诊未关联复诊计划",function(e){return e.text.slice(0,36);});
+    }
+    if (medEvent) {
+      const previous=$("med-order").value;
+      $("med-order").innerHTML=selectOptions(medEvent.entries.filter(function(e){return e.kind==="order"&&e.orderType==="prescription";}),"未关联 / 自行记录实际用药",function(e){return e.text || "处方";});
+      if(medEvent.entries.some(function(e){return e.id===previous&&e.orderType==="prescription";}))$("med-order").value=previous;
+      renderMedItems();
+    }
+  }
+
+  function orderSnapshot(event){
+    const orders=event.entries.filter(function(e){return e.kind==="order";});
+    const superseded=new Set(orders.map(function(o){return o.supersedes;}).filter(Boolean));
+    const meds=event.entries.filter(function(e){return e.kind==="med";});
+    const treatments=event.entries.filter(function(e){return e.kind==="treatment";});
+    const visits=event.entries.filter(function(e){return e.kind==="visit";});
+    return {orders,superseded,meds,treatments,visits};
+  }
+  function renderOrderComparison(event){
+    const d=orderSnapshot(event);
+    if(!d.orders.length)return '<div class="empty">尚无医生医嘱（未记录不代表不存在）</div>';
+    return '<p class="helper">以下仅统计明确关联的实际记录次数，不能据此判断是否遵医嘱或是否已经完成疗程。</p>'+
+      d.orders.slice().sort(function(a,b){return new Date(b.when)-new Date(a.when);}).map(function(o){
+        const old=d.superseded.has(o.id);
+        const uses=d.meds.filter(function(m){return m.orderId===o.id;});
+        const done=d.treatments.filter(function(t){return t.orderId===o.id;});
+        const followed=d.visits.filter(function(v){return v.followupOrderId===o.id;});
+        let linked='';
+        if(o.orderType==="prescription"){
+          const itemRows=(o.items||[]).map(function(item){
+            const count=uses.filter(function(m){return m.itemId===item.id;}).length;
+            return '<div class="compare-line"><span>'+esc(item.name||"未命名药品")+
+              '</span><span>'+count+' 条已关联的实际用药记录</span></div>';
+          }).join("");
+          linked=itemRows+(uses.some(function(m){return !m.itemId;})?
+            '<div class="compare-line"><span>未明确对应药品</span><span>'+uses.filter(function(m){return !m.itemId;}).length+' 条关联整方的记录</span></div>':'');
+          if(!linked)linked='<p class="helper">暂无关联实际用药记录；不代表未服用。</p>';
+        } else if(o.orderType==="treatment")linked='<p class="helper">关联的实际治疗记录：'+done.length+' 条；未记录不等于未治疗。</p>';
+        else if(o.orderType==="followup")linked='<p class="helper">建议日期：'+esc(o.dueDate||"未填写")+
+          ' · 关联的实际就诊记录：'+followed.length+' 条；未记录不代表未就诊。</p>';
+        return '<div class="compare-card"><div class="compare-heading"><strong>'+esc(orderNames[o.orderType]||"医嘱")+
+          '</strong><span class="status-pill">'+(old?"已有后续替代版本":"当前无后续替代记录")+'</span></div>'+
+          '<p>'+esc(o.text||"原文未另填")+'</p>'+linked+'</div>';
+      }).join("");
+  }
+  function renderFollowupPlan(event){
+    const d=orderSnapshot(event);
+    const plans=d.orders.filter(function(o){return o.orderType==="followup"&&!d.superseded.has(o.id);});
+    if(!plans.length)return "";
+    return '<div class="plan-list"><h4>复诊 / 复查计划（用户转录）</h4>'+
+      plans.map(function(o){
+        const done=d.visits.filter(function(v){return v.followupOrderId===o.id;});
+        return '<div class="plan-item"><strong>'+esc(o.dueDate||"日期未明确")+'</strong><span>'+
+          esc(o.text||"复诊/复查")+'</span><small>已关联实际就诊 '+done.length+' 次；未登记不代表未就诊</small></div>';
+      }).join("")+'</div>';
+  }
+  function renderCare() {
+    const event = eventById($("care-event").value) || currentEvent();
+    if (!event) { $("care-list").innerHTML = '<div class="empty">请先创建健康事件</div>';return; }
+    const care = event.entries.filter(function(en){return ["visit","order","treatment"].includes(en.kind);});
+    care.sort(function(a,b){return new Date(b.when)-new Date(a.when);});
+    $("order-comparison").innerHTML=renderOrderComparison(event);
+    $("followup-overview").innerHTML=renderFollowupPlan(event);
+    $("care-list").innerHTML = care.length ? care.map(function(en){
+      const badge = en.kind === "visit" ? "就医" : en.kind === "order" ? "医嘱 / 处方" : "治疗执行";
+      return '<div class="med-list-item"><span class="status-pill">'+badge+'</span><strong class="care-item-title">'+esc(entryTitle(en))+'</strong><p>'+
+        esc(fmt(en.when))+'</p><p>'+esc(entryDescription(en))+'</p></div>';
+    }).join(""):'<div class="empty">该事件还没有就医、医嘱或实际治疗记录</div>';
+  }
+  function selectCareTab(tab) {
+    document.querySelectorAll("[data-care-tab]").forEach(function(btn){btn.classList.toggle("active",btn.dataset.careTab===tab);});
+    document.querySelectorAll(".care-form").forEach(function(el){el.classList.toggle("active",el.id==="care-"+tab+"-form");});
+  }
+  function createCareEntry(entry) {
+    const event=eventById($("care-event").value);
+    if(!event){notify("请先建立健康事件");return false;}
+    event.entries.push(entry);
+    state.currentEventId=event.id;
+    state.qaIndex=0;state.qaAnswers=[];
+    renderEverything();
+    $("care-event").value=event.id; renderLinkedChoices();renderCare();
+    notify("记录已保存：医嘱与实际执行会分开展示");
+    return true;
+  }
+  function saveVisit(){
+    const when=$("visit-date").value || currentLocal(),hospital=$("visit-hospital").value.trim(),department=$("visit-dept").value.trim(),notes=$("visit-note").value.trim();
+    if(!hospital && !department && !notes){notify("请至少填写医疗机构、科室或医生意见");return;}
+    if(createCareEntry({id:"v-"+Date.now(),kind:"visit",when,hospital:hospital.slice(0,120),department:department.slice(0,120),notes:notes.slice(0,2000),sourceType:"self",followupOrderId:$("visit-followup").value})){
+      $("visit-hospital").value="";$("visit-dept").value="";$("visit-note").value="";$("visit-followup").value="";
+    }
+  }
+  function saveOrder(){
+    const type=$("order-type").value,textValue=$("order-text").value.trim();
+    const all=type==="prescription"?getRxItems():[];
+    if(all.some(function(x){return !x.name&&(x.strength||x.doseText||x.frequency||x.duration);})){
+      notify("处方明细存在缺少药名的条目，请核对或删除");return;
+    }
+    const items=all.filter(function(x){return x.name;}).map(function(x){
+      return {id:x.id,name:x.name.slice(0,120),strength:x.strength.slice(0,100),
+        doseText:x.doseText.slice(0,120),frequency:x.frequency.slice(0,120),duration:x.duration.slice(0,120)};
+    });
+    if(!textValue&&!items.length){notify("请输入医嘱原文或至少一项药品明细");return;}
+    const supersedes=$("order-supersedes").value;
+    const ev=eventById($("care-event").value);
+    const old=ev&&ev.entries.find(function(x){return x.id===supersedes&&x.kind==="order";});
+    if(supersedes&&(!old||old.orderType!==type)){notify("替代关系必须选择同类型旧医嘱");return;}
+    const item={id:"o-"+Date.now(),kind:"order",when:$("order-time").value||currentLocal(),
+      visitId:$("order-visit").value,orderType:type,text:textValue.slice(0,2500),
+      items,dueDate:type==="followup"?$("order-due").value:"",
+      supersedes:supersedes||null,sourceType:$("order-source").value,
+      executionStatus:$("order-status").value};
+    if(createCareEntry(item)){
+      $("order-text").value="";$("order-visit").value="";
+      $("order-status").value="unknown";$("order-supersedes").value="";$("order-due").value="";
+      renderRxItems([]);addRx();clearLocalPhoto();
+    }
+  }
+  function saveTreatment(){
+    const name=$("treatment-name").value.trim();
+    if(!name){notify("请填写实际进行的治疗项目");return;}
+    if(createCareEntry({
+      id:"t-"+Date.now(),kind:"treatment",when:$("treatment-time").value||currentLocal(),
+      name:name.slice(0,200),details:$("treatment-detail").value.trim().slice(0,2000),orderId:$("treatment-order").value,sourceType:"self"
+    })){$("treatment-name").value="";$("treatment-detail").value="";$("treatment-order").value="";}
+  }
+  function renderMedication() {
+    const meds = [];
+    state.events.forEach(function (e) { e.entries.forEach(function (en) { if (en.kind === "med") meds.push({ event: e, entry: en }); }); });
+    meds.sort(function (a, b) { return new Date(b.entry.when) - new Date(a.entry.when); });
+    $("medication-list").innerHTML = meds.length ? meds.map(function (item) {
+      return '<div class="med-list-item"><strong>✚ ' + esc(item.entry.name) + '</strong><p>' + fmt(item.entry.when) + ' · ' + esc(item.entry.dose + " " + item.entry.unit) + '</p><p>关联事件：' + esc(item.event.title) + '</p><p>' + esc(item.entry.notes || "未记录服用后感受") + '</p></div>';
+    }).join("") : '<div class="empty">还没有用药记录</div>';
+  }
+  function renderReport() {
+    const id = $("report-event").value || state.currentEventId;
+    const e = eventById(id); if (!e) return;
+    const full = $("report-mode").value === "followup";
+    const symptoms = e.entries.filter(function (x) { return x.kind === "symptom"; });
+    const medication = e.entries.filter(function (x) { return x.kind === "med"; });
+    const visits = e.entries.filter(function (x) { return x.kind === "visit"; });
+    const orders = e.entries.filter(function (x) { return x.kind === "order"; });
+    const treatments = e.entries.filter(function (x) { return x.kind === "treatment"; });
+    const relevantEntries = e.entries.filter(function (x) { return full || x.kind === "med" || x.kind === "symptom"; });
+    const allZones = Array.from(new Set(symptoms.flatMap(function(s) { return (s.zones || []).map(function(z) { return z.label; }); })));
+    const selectedKeys = new Set(symptoms.flatMap(function (en) { return (en.zones || []).map(function(z) { return z.key; }); }));
+    let bodyFigures = "";
+    ["front","back"].forEach(function(view) {
+      if(Array.from(selectedKeys).some(function(key){return key.indexOf(view+":")===0;})) {
+        bodyFigures += '<div style="width:130px;text-align:center"><svg viewBox="0 0 320 500" style="height:170px;display:block;margin:auto" aria-label="' +
+          (view==="front"?"正面":"背面")+'症状部位示意">'+bodyMarkup(view,selectedKeys,false)+'</svg><small>'+
+          (view==="front"?"正面":"背面")+'</small></div>';
+      }
+    });
+    const timeline = relevantEntries.slice().sort(function(a,b){return new Date(a.when)-new Date(b.when);}).map(function(en){
+      return '<div class="timeline-row"><span>'+esc(fmt(en.when))+'</span><span><strong>'+esc(entryTitle(en))+
+        '</strong>'+(entryDescription(en)?'<br>'+esc(entryDescription(en)):'')+'</span></div>';
+    }).join("");
+    const li = function(items,transform){
+      return items.length ? '<ul>'+items.map(function(item){return '<li>'+transform(item)+'</li>';}).join("")+'</ul>' :
+        '<p>暂无相应记录；未记录不代表未发生。</p>';
+    };
+    const comparisonHtml=renderOrderComparison(e),followupPlanHtml=renderFollowupPlan(e);
+    const medicationHtml = li(medication,function(m){
+      const linked = m.orderId ? orders.find(function(o){return o.id===m.orderId;}) : null;
+      return '<strong>实际服用：</strong>'+esc(fmt(m.when)+' · '+m.name+' · '+m.dose+m.unit) +
+        (linked ? '<br><small>关联处方（用户转录）：'+esc(linked.text)+'</small>':'<br><small>未关联处方 / 医嘱</small>')+
+        (linked && m.itemId ? '<br><small>对应处方药品：'+esc(((linked.items||[]).find(function(x){return x.id===m.itemId;})||{}).name||"明细未找到")+'</small>':'');
+    });
+    const encountersHtml = li(visits,function(v){
+      return '<strong>'+esc(fmt(v.when)+' · '+(v.hospital||"机构未记录"))+'</strong>'+
+        '<br>'+esc(v.department||"科室未记录")+' · '+esc(v.notes||"未记录医师意见")+
+        '<br><small>来源：用户转录，非已核验医疗机构记录</small>';
+    });
+    const orderHtml = li(orders,function(o){
+      const visit = o.visitId && visits.find(function(v){return v.id===o.visitId;});
+      const drugDetails=(o.items||[]).map(function(item){
+        return '<li>'+esc(item.name)+' · 规格 '+esc(item.strength||"不明")+' · 单次用量 '+esc(item.doseText||"不明")+
+          ' · 频次 '+esc(item.frequency||"不明")+' · 疗程 '+esc(item.duration||"不明")+'</li>';
+      }).join("");
+      const revision=o.supersedes?'<br><small>新版本：关联此前医嘱（保留旧记录）</small>':'';
+      return '<strong>'+esc(fmt(o.when)+' · '+(orderNames[o.orderType]||"医嘱"))+'</strong><br>'+
+        esc(o.text||"医嘱原文未另填")+(drugDetails?'<ul>'+drugDetails+'</ul>':'')+
+        (o.dueDate?'<br><small>计划复诊/复查日期：'+esc(o.dueDate)+'</small>':'')+revision+
+        '<br><small>状态：'+esc(executionNames[o.executionStatus]||"尚未确认")+
+        '；来源：'+esc(o.sourceType==="document"?"依据文书手工转录，原件未核验":"用户回忆/转录，待核实")+
+        (visit?'；关联就诊：'+esc(visit.hospital||"已关联"):'')+'</small>';
+    });
+    const treatmentHtml = li(treatments,function(t){
+      const linked = t.orderId && orders.find(function(o){return o.id===t.orderId;});
+      return '<strong>'+esc(fmt(t.when)+' · '+t.name)+'</strong><br>'+esc(t.details||"未记录实施细节")+
+        '<br><small>实际执行情况：用户自述'+(linked?'；关联医嘱：'+esc(linked.text||"治疗医嘱"):'')+'</small>';
+    });
+    const aiSection = $("report-ai").checked ?
+      '<section class="report-section"><h3>AI 功能说明（非医学建议）</h3><p>本原型未运行任何医学分析模型或危险信号分诊。正式产品中 AI 推断必须与事实分区、可追溯且经过医学安全验证。</p></section>' : "";
+    const followup = full ?
+      '<section class="report-section"><h3>就医及医疗机构信息（用户转录）</h3>'+encountersHtml+'</section>'+
+      '<section class="report-section"><h3>医生开具的医嘱 / 处方（尚不代表执行）</h3>'+orderHtml+'</section>'+
+      '<section class="report-section"><h3>复诊 / 复查计划与已关联就诊</h3>'+(followupPlanHtml||'<p>暂无复诊计划记录。</p>')+'</section>'+
+      '<section class="report-section"><h3>医嘱与实际执行记录对照</h3>'+comparisonHtml+'</section>'+
+      '<section class="report-section"><h3>实际治疗执行记录（用户自述）</h3>'+treatmentHtml+'</section>' : "";
+    $("report-content").innerHTML =
+      '<div class="report-title"><span class="eyebrow">HEALTH / VISIT SUMMARY</span><h2>'+
+      (full?'就医与治疗全程档案':'就医前健康情况摘要')+'</h2><p>由本人记录生成 · 全部为演示数据 · 用于就医沟通流程测试</p></div>'+
+      '<div class="report-meta"><span>事件：'+esc(e.title)+'</span><span>开始：'+dayFmt(e.start)+'</span><span>状态：'+esc(e.status)+'</span></div>'+
+      '<section class="report-section"><h3>主要不适与部位</h3><p>'+
+      (symptoms.length?esc(symptoms.map(function(x){return (x.symptoms||[]).join("、");}).filter(Boolean).join(" / ")||"未分类症状"):"暂无症状记录")+
+      '</p><p>涉及部位：'+esc(allZones.join("、")||(symptoms.some(function(x){return x.unlocated;})?"全身 / 位置不明确":"位置未记录"))+
+      '</p>'+(bodyFigures?'<div style="display:flex;gap:12px;justify-content:flex-start;flex-wrap:wrap">'+bodyFigures+'</div>':'')+'</section>'+
+      '<section class="report-section"><h3>症状'+(full?'与就医处理':'与实际用药')+'时间线</h3>'+(timeline||'<p>暂无详细记录。</p>')+'</section>'+
+      '<section class="report-section"><h3>实际用药（与处方分开）</h3>'+medicationHtml+'</section>'+followup+
+      '<section class="report-section"><h3>供医生进一步核对的问题</h3><p>发作过程、既往相关经历、当前用药、医生医嘱的准确内容与后续治疗安排。未填写的信息不代表不存在。</p></section>'+
+      aiSection+'<div class="report-foot">资料来源：用户自述与转录（虚构）。医生医嘱和处方需与原件核对；标记“已执行”不替代实际用药或治疗记录。不是诊断或急救建议。报告生成：'+esc(new Date().toLocaleString("zh-CN"))+'。</div>';
+  }
+  const commonQuestions = [
+    {text:"这次不舒服是突然出现，还是逐渐开始的？",options:["突然开始","逐渐出现","说不清"]},
+    {text:"这种不舒服是持续存在，还是一阵一阵出现？",options:["持续存在","间歇出现","不确定"]},
+    {text:"与刚开始相比，目前的感觉有什么变化？",options:["更明显了","有所减轻","差不多","不清楚"]}
+  ];
+  // A deterministic UI demonstration, not clinical triage or model output.
+  function questionsForEvent() {
+    const e=eventById($("qa-event").value)||currentEvent();
+    if(!e)return commonQuestions;
+    const data=e.entries.filter(function(x){return x.kind==="symptom";});
+    const zones=data.flatMap(function(en){return (en.zones||[]).map(function(z){return z.key;});});
+    const symptoms=data.flatMap(function(en){return en.symptoms||[];});
+    let prefix=[];
+    if(zones.some(function(z){return /abd|navel/.test(z);})) {
+      prefix=[{text:"这次腹部不适与进食时间有什么关系？",options:["饭前更明显","饭后更明显","暂未发现关系","不清楚"]}];
+    } else if(zones.some(function(z){return /head|neck/.test(z);}) || symptoms.includes("头晕")) {
+      prefix=[{text:"不适的主要位置是否发生过变化？",options:["位置比较固定","位置有变化","说不清"]}];
+    } else if(zones.some(function(z){return /chest/.test(z);})) {
+      prefix=[{text:"不适是否影响了你平时的活动？",options:["有影响","没有明显影响","不清楚"]}];
+    } else if(zones.some(function(z){return /arm|hand|thigh|calf|shoulder|lumbar/.test(z);})) {
+      prefix=[{text:"这些不适和身体活动有没有时间上的关联？",options:["活动时更明显","休息时更明显","暂未发现关系","不清楚"]}];
+    }
+    return prefix.concat(commonQuestions).slice(0,4);
+  }
+  function renderQA() {
+    const panel=$("qa-panel"),questions=questionsForEvent();
+    if(state.qaIndex>=questions.length) {
+      panel.innerHTML='<div class="qa-finished"><h4>✓ 本次模拟补充问询已结束</h4><p>以下内容只用于演示如何收集病程信息，没有任何疾病分析或紧急程度判断。</p><ul>'+
+        state.qaAnswers.map(function(a,i){return '<li>'+esc(questions[i].text+" "+a)+'</li>';}).join("")+
+        '</ul><p><strong>正式产品限制：</strong>按症状引导问询的内容必须通过医学评审；紧急风险不能由大模型擅自判断或降级。</p>'+
+        '<button type="button" class="btn btn-outline" id="restart-qa">重新体验</button></div>';return;
+    }
+    const q=questions[state.qaIndex];
+    panel.innerHTML='<div class="qa-box"><small>问题 '+(state.qaIndex+1)+' / '+questions.length+' · 事件感知问询示例</small><h4>'+esc(q.text)+'</h4>'+
+      '<div class="qa-choices">'+q.options.map(function(option){return '<button type="button" data-answer="'+esc(option)+'">'+esc(option)+'</button>';}).join("")+
+      '</div></div><p class="form-footnote">根据事件的症状/部位选择预设问题，不调用 AI；支持“说不清”。</p>';
+  }
+  function renderEverything() {
+    renderBody(); renderChips(); renderStats(); renderHome(); populateEventSelects();
+    renderEvents(); renderMedication(); renderCare(); renderReport(); renderQA();
+  }
+  function saveSymptom() {
+    const symptoms = Array.from(state.symptoms), zones = Array.from(state.zones.entries()).map(function (pair) { return { key: pair[0], label: pair[1] }; });
+    const notes = $("symptom-notes").value.trim(), severity = $("severity-unknown").checked ? null : Number($("severity").value);
+    const when = $("symptom-onset").value || currentLocal();
+    const from = state.radiationFrom, to = state.radiationTo;
+    if ((from || to) && (!from || !to || from === to || !state.zones.has(from) || !state.zones.has(to))) {
+      notify("放射方向需选择两个不同且已标记的位置，或全部留空"); return;
+    }
+    if (!symptoms.length && !zones.length && !notes && !state.unlocated) { notify("请至少选择部位、症状，或填写补充说明"); return; }
+    const target = $("target-event").value;
+    let e = target === "new" ? null : eventById(target);
+    if (!e) {
+      const suggested = (zones[0] ? zones[0].label : "未明确部位") + (symptoms[0] || "不适");
+      const name = window.prompt("为本次健康事件命名（可修改）", suggested);
+      if (name === null) return;
+      e = { id: "e-" + Date.now(), title: name.trim().slice(0, 60) || suggested, start: when, status: "进行中", entries: [] };
+      state.events.push(e);
+    }
+    e.entries.push({ id: "s-" + Date.now(), kind: "symptom", when: when, zones: zones, unlocated: state.unlocated, symptoms: symptoms, severity: severity, notes: notes, radiation: from && to ? {from:state.zones.get(from),to:state.zones.get(to)} : null });
+    state.currentEventId = e.id;
+    state.qaIndex=0;state.qaAnswers=[];
+    state.symptoms.clear(); state.zones.clear(); state.unlocated = false; state.activeZone=null;state.radiationFrom="";state.radiationTo="";
+    $("symptom-notes").value = ""; $("severity").value = 5; $("severity-unknown").checked = true; $("severity").disabled = true; $("severity-value").textContent = "未评分";
+    renderEverything(); notify("已保存症状，并关联到健康事件"); go("events");
+  }
+  function saveMedication() {
+    const name = $("med-name").value.trim(), dose = $("med-dose").value.trim(), when = $("med-time").value || currentLocal();
+    const event = eventById($("med-event").value);
+    if (!name || !dose) { notify("请填写药名和实际服用量；无法确认请不要猜测"); return; }
+    if (!event) { notify("请先新建健康事件，再记录本次用药"); return; }
+    event.entries.push({ id: "m-" + Date.now(), kind: "med", when: when, name: name.slice(0, 120), dose: dose.slice(0, 60), unit: $("med-unit").value, notes: $("med-note").value.trim(),orderId:$("med-order").value,itemId:$("med-item").value });
+    state.currentEventId = event.id;
+    state.qaIndex=0;state.qaAnswers=[];
+    $("med-name").value = ""; $("med-dose").value = ""; $("med-note").value = "";
+    renderEverything(); notify("实际用药记录已关联到健康事件"); go("events");
+  }
+  function reportAsText() {
+    const event = eventById($("report-event").value || state.currentEventId);
+    if (!event) return "";
+    const full = $("report-mode").value === "followup";
+    const all = event.entries.filter(function(e){return full || e.kind==="symptom" || e.kind==="med";})
+      .sort(function (a, b) { return new Date(a.when) - new Date(b.when); });
+    return [full ? "就医与治疗全程档案（演示数据）" : "就医前健康情况摘要（演示数据）", "事件：" + event.title, "开始：" + dayFmt(event.start), "状态：" + event.status, "", "记录时间线:"]
+      .concat(all.map(function (entry) { return fmt(entry.when) + " " + entryTitle(entry) + "；" + entryDescription(entry); }))
+      .concat(["", "声明：资料来自用户自述/虚构演示数据，仅用于就医沟通，不构成诊断。"]).join("\n");
+  }
+  function bind() {
+    document.addEventListener("click", function (event) {
+      const nav = event.target.closest("[data-nav]");
+      if (nav) { go(nav.dataset.nav); return; }
+      const eventChoice = event.target.closest("[data-event]");
+      if (eventChoice) { state.currentEventId = eventChoice.dataset.event; state.qaIndex=0;state.qaAnswers=[]; renderEverything(); go("events"); return; }
+      const answer = event.target.closest("[data-answer]");
+      if (answer) { state.qaAnswers.push(answer.dataset.answer); state.qaIndex++; renderQA(); return; }
+      const remove = event.target.closest("[data-remove-zone]");
+      if (remove) { state.zones.delete(remove.dataset.removeZone); renderBody(); return; }
+      if (event.target.closest("#restart-qa")) { state.qaIndex = 0; state.qaAnswers = []; renderQA(); return; }
+      if (event.target.closest("#toggle-event")) {
+        const e = currentEvent(); if (e) e.status = e.status === "进行中" ? "已结束" : "进行中";
+        renderEverything(); return;
+      }
+      if (event.target.closest("#open-report")) { renderEverything(); go("report"); }
+    });
+    $("body-svg").addEventListener("click", function (event) {
+      const shape = event.target.closest("[data-zone]");
+      if (!shape) return;
+      const key = shape.dataset.zone;
+      const label = shape.querySelector("title").textContent;
+      state.activeZone = key;
+      const matches = Array.from(state.zones.keys()).filter(function (v) { return v === key || v.startsWith(key + "|"); });
+      if (matches.length) matches.forEach(function (v) { state.zones.delete(v); });
+      else state.zones.set(key, label);
+      state.unlocated = false;
+      renderBody();
+    });
+    $("body-svg").addEventListener("keydown", function (event) {
+      if (event.key === "Enter" || event.key === " ") {
+        const shape = event.target.closest("[data-zone]");
+        if (shape) { event.preventDefault(); shape.dispatchEvent(new MouseEvent("click", { bubbles: true })); }
+      }
+    });
+    $("switch-front").addEventListener("click", function () { state.bodyView = "front"; renderBody(); });
+    $("switch-back").addEventListener("click", function () { state.bodyView = "back"; renderBody(); });
+    $("zone-detail").addEventListener("click", function (event) {
+      const btn = event.target.closest("[data-zone-detail]"); if (!btn || !state.activeZone) return;
+      const base = state.activeZone, code = btn.dataset.zoneDetail;
+      if (code === "whole") {
+        Array.from(state.zones.keys()).filter(function (v) { return v.startsWith(base+"|"); }).forEach(function(v){state.zones.delete(v);});
+        if (state.zones.has(base)) state.zones.delete(base); else state.zones.set(base, zoneLabel(base));
+      } else {
+        const key = base + "|" + code;
+        const detail = (zoneDetails[base] || [])[Number(code)];
+        if (!detail) return;
+        state.zones.delete(base);
+        if (state.zones.has(key)) state.zones.delete(key); else state.zones.set(key, detail);
+      }
+      state.unlocated = false; renderBody();
+    });
+    $("radiate-from").addEventListener("change", function(){state.radiationFrom=this.value;});
+    $("radiate-to").addEventListener("change", function(){state.radiationTo=this.value;});
+    $("clear-areas").addEventListener("click", function () { state.zones.clear(); state.activeZone=null; state.radiationFrom="";state.radiationTo=""; state.unlocated = false; renderBody(); });
+    $("unlocated").addEventListener("click", function () { state.unlocated = !state.unlocated; if (state.unlocated) {state.zones.clear();state.radiationFrom="";state.radiationTo="";state.activeZone=null;} renderBody(); });
+    $("symptom-chips").addEventListener("click", function (event) {
+      const btn = event.target.closest("[data-symptom]"); if (!btn) return;
+      if (state.symptoms.has(btn.dataset.symptom)) state.symptoms.delete(btn.dataset.symptom); else state.symptoms.add(btn.dataset.symptom);
+      renderChips();
+    });
+    $("severity").addEventListener("input", function () { $("severity-value").textContent = this.value + " / 10"; });
+    $("severity-unknown").addEventListener("change", function () { $("severity").disabled = this.checked; $("severity-value").textContent = this.checked ? "未评分" : $("severity").value + " / 10"; });
+    $("save-symptom").addEventListener("click", saveSymptom);
+    $("save-med").addEventListener("click", saveMedication);
+    $("med-order").addEventListener("change",renderMedItems);
+    $("order-type").addEventListener("change",showOrderFields);
+    $("order-photo").addEventListener("change",showLocalPhoto);
+    $("add-rx-item").addEventListener("click",addRx);
+    $("rx-items").addEventListener("click",function(event){
+      const btn=event.target.closest("[data-remove-rx]");if(!btn)return;
+      renderRxItems(getRxItems().filter(function(x){return x.id!==btn.dataset.removeRx;}));
+    });
+    ["care-event","med-event"].forEach(function(id){$(id).addEventListener("change",function(){renderLinkedChoices();if(id==="care-event")renderCare();});});
+    document.querySelectorAll("[data-care-tab]").forEach(function(btn){btn.addEventListener("click",function(){selectCareTab(btn.dataset.careTab);});});
+    $("save-visit").addEventListener("click",saveVisit);
+    $("save-order").addEventListener("click",saveOrder);
+    $("save-treatment").addEventListener("click",saveTreatment);
+    $("report-event").addEventListener("change", function () { state.currentEventId = this.value; state.qaIndex=0;state.qaAnswers=[]; renderReport(); });
+    $("report-mode").addEventListener("change",renderReport);
+    $("qa-event").addEventListener("change",function(){state.qaIndex=0;state.qaAnswers=[];renderQA();});
+    $("report-ai").addEventListener("change", renderReport);
+    $("print-report").addEventListener("click", function () { renderReport(); window.print(); });
+    $("copy-report").addEventListener("click", async function () {
+      try {
+        await navigator.clipboard.writeText(reportAsText()); notify("报告文字已复制");
+      } catch (e) { notify("当前浏览器无法直接复制，可选择打印 / 保存 PDF"); }
+    });
+    $("show-alert-demo").addEventListener("click", function () { $("emergency-modal").hidden = false; });
+    $("close-modal").addEventListener("click", function () { $("emergency-modal").hidden = true; });
+    $("emergency-modal").addEventListener("click", function (event) { if (event.target === this) this.hidden = true; });
+    document.addEventListener("keydown", function (event) { if (event.key === "Escape") $("emergency-modal").hidden = true; });
+  }
+  function init() {
+    $("symptom-onset").value = currentLocal();
+    $("med-time").value = currentLocal();
+    ["visit-date","order-time","treatment-time"].forEach(function(id){$(id).value=currentLocal();});
+    addRx();showOrderFields();
+    bind(); renderEverything(); go("home");
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+})();
+</script>
+</body>
+</html>

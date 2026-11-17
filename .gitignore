@@ -1,0 +1,49 @@
+# Local environments and credentials (never commit)
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+*.pem
+*.p12
+*.pfx
+*.key
+*.secret
+
+# Prototype and browser test tools
+node_modules/
+playwright-report/
+test-results/
+coverage/
+.nyc_output/
+
+# Local databases, dumps, health records, exports and files
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+*.sql.dump
+*.bak
+*.backup
+*.dump
+private/
+secrets/
+uploads/
+attachments/
+patient-data/
+real-data/
+reports/private/
+data/private/
+
+# Framework and build artifacts
+dist/
+build/
+.wrangler/
+.cache/
+.tmp/
+*.log
+.DS_Store
+
+# IMPORTANT: .gitignore is not a security boundary. Never put real medical data
+# or patient files in this PUBLIC repository, even if a path is ignored.
