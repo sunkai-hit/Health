@@ -1,0 +1,12 @@
+{
+  "compileType": "miniprogram",
+  "appid": "touristappid",
+  "projectname": "Health-S4-synthetic-only",
+  "setting": {
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "urlCheck": true
+  },
+  "description": "Synthetic read-only development shell only. Set a legitimate AppID locally before future real-device preview."
+}
