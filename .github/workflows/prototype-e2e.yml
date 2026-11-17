@@ -12,6 +12,7 @@ on:
       - 'src/**'
       - 'scripts/**'
       - 'wrangler.jsonc'
+      - 'wrangler.local.jsonc'
       - 'tsconfig.json'
       - '.github/workflows/prototype-e2e.yml'
   push:
@@ -20,6 +21,7 @@ on:
       - 'feature/mvp-s1-core'
       - 'feature/mvp-s2-identity'
       - 'feature/mvp-s2-browser-qa'
+      - 'feature/mvp-s3-auth-boundary'
     paths:
       - 'prototype/**'
       - 'tests/**'
@@ -30,6 +32,7 @@ on:
       - 'src/**'
       - 'scripts/**'
       - 'wrangler.jsonc'
+      - 'wrangler.local.jsonc'
       - 'tsconfig.json'
       - '.github/workflows/prototype-e2e.yml'
   workflow_dispatch:
@@ -124,3 +127,33 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+
+  auth-release-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install identity security test dependencies
+        run: npm install --no-audit --no-fund
+      - name: Type-check isolated authentication contracts
+        run: npm run check:types
+      - name: Validate OIDC configuration policy with negative tests
+        run: npm run test:auth-policy
+      - name: Ensure default worker denies ALL routes on real HTTP
+        run: npm run test:release-guard
+      - name: Verify default release Worker can build without synthetic credentials
+        run: npm run check:release-bundle
+      - name: Assert deploy bundle has no demo identity module
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -E 'synthetic-owner-alice-v1|synthetic-owner-bob-v1|health-local-s2|DEMO_AUTH_SECRET_BASE64' .tmp/release-gate-build/; then
+            echo 'Demo identity logic leaked into default release bundle!'
+            exit 1
+          fi
+          echo 'Default release bundle contains no demo identities or signing secret references.'
