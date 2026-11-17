@@ -329,48 +329,109 @@
   }
   function renderReport() {
     const id = $("report-event").value || state.currentEventId;
-    const e = eventById(id);
-    if (!e) return;
+    const e = eventById(id); if (!e) return;
+    const full = $("report-mode").value === "followup";
     const symptoms = e.entries.filter(function (x) { return x.kind === "symptom"; });
     const medication = e.entries.filter(function (x) { return x.kind === "med"; });
-    const allZones = Array.from(new Set(symptoms.flatMap(function (s) { return (s.zones || []).map(function (z) { return z.label; }); })));
-    const selectedKeys = new Set(symptoms.flatMap(function (s) { return (s.zones || []).map(function (z) { return z.key; }); }));
+    const visits = e.entries.filter(function (x) { return x.kind === "visit"; });
+    const orders = e.entries.filter(function (x) { return x.kind === "order"; });
+    const treatments = e.entries.filter(function (x) { return x.kind === "treatment"; });
+    const relevantEntries = e.entries.filter(function (x) { return full || x.kind === "med" || x.kind === "symptom"; });
+    const allZones = Array.from(new Set(symptoms.flatMap(function(s) { return (s.zones || []).map(function(z) { return z.label; }); })));
+    const selectedKeys = new Set(symptoms.flatMap(function (en) { return (en.zones || []).map(function(z) { return z.key; }); }));
     let bodyFigures = "";
-    ["front", "back"].forEach(function (view) {
-      if (Array.from(selectedKeys).some(function (key) { return key.indexOf(view + ":") === 0; })) {
-        bodyFigures += '<div style="width:130px;text-align:center"><svg viewBox="0 0 320 500" style="height:170px;display:block;margin:auto" aria-label="' + (view === "front" ? "正面" : "背面") + '症状部位示意">' + bodyMarkup(view, selectedKeys, false) + '</svg><small>' + (view === "front" ? "正面" : "背面") + '</small></div>';
+    ["front","back"].forEach(function(view) {
+      if(Array.from(selectedKeys).some(function(key){return key.indexOf(view+":")===0;})) {
+        bodyFigures += '<div style="width:130px;text-align:center"><svg viewBox="0 0 320 500" style="height:170px;display:block;margin:auto" aria-label="' +
+          (view==="front"?"正面":"背面")+'症状部位示意">'+bodyMarkup(view,selectedKeys,false)+'</svg><small>'+
+          (view==="front"?"正面":"背面")+'</small></div>';
       }
     });
-    const timeline = e.entries.slice().sort(function (a, b) { return new Date(a.when) - new Date(b.when); }).map(function (en) {
-      return '<div class="timeline-row"><span>' + esc(fmt(en.when)) + '</span><span><strong>' + esc(entryTitle(en)) + '</strong>' + (entryDescription(en) ? '<br>' + esc(entryDescription(en)) : '') + '</span></div>';
+    const timeline = relevantEntries.slice().sort(function(a,b){return new Date(a.when)-new Date(b.when);}).map(function(en){
+      return '<div class="timeline-row"><span>'+esc(fmt(en.when))+'</span><span><strong>'+esc(entryTitle(en))+
+        '</strong>'+(entryDescription(en)?'<br>'+esc(entryDescription(en)):'')+'</span></div>';
     }).join("");
-    const aiSection = $("report-ai").checked ? '<div class="report-section"><h3>AI 功能说明（非医学建议）</h3><p>本原型未运行任何医学分析模型或危险信号分诊。正式产品中任何 AI 解释须与用户记录事实分开，并经过适当的安全验证。</p></div>' : "";
+    const li = function(items,transform){
+      return items.length ? '<ul>'+items.map(function(item){return '<li>'+transform(item)+'</li>';}).join("")+'</ul>' :
+        '<p>暂无相应记录；未记录不代表未发生。</p>';
+    };
+    const medicationHtml = li(medication,function(m){
+      const linked = m.orderId ? orders.find(function(o){return o.id===m.orderId;}) : null;
+      return '<strong>实际服用：</strong>'+esc(fmt(m.when)+' · '+m.name+' · '+m.dose+m.unit) +
+        (linked ? '<br><small>关联处方（用户转录）：'+esc(linked.text)+'</small>':'<br><small>未关联处方 / 医嘱</small>');
+    });
+    const encountersHtml = li(visits,function(v){
+      return '<strong>'+esc(fmt(v.when)+' · '+(v.hospital||"机构未记录"))+'</strong>'+
+        '<br>'+esc(v.department||"科室未记录")+' · '+esc(v.notes||"未记录医师意见")+
+        '<br><small>来源：用户转录，非已核验医疗机构记录</small>';
+    });
+    const orderHtml = li(orders,function(o){
+      const visit = o.visitId && visits.find(function(v){return v.id===o.visitId;});
+      return '<strong>'+esc(fmt(o.when)+' · '+(orderNames[o.orderType]||"医嘱"))+'</strong><br>'+
+        esc(o.text||"医嘱内容未填写")+'<br><small>状态：'+esc(executionNames[o.executionStatus]||"尚未确认")+
+        '；来源：'+esc(o.sourceType==="document"?"依据文书手工转录，原件未核验":"用户回忆/转录，待核实")+
+        (visit?'；关联就诊：'+esc(visit.hospital||"已关联"):'')+'</small>';
+    });
+    const treatmentHtml = li(treatments,function(t){
+      const linked = t.orderId && orders.find(function(o){return o.id===t.orderId;});
+      return '<strong>'+esc(fmt(t.when)+' · '+t.name)+'</strong><br>'+esc(t.details||"未记录实施细节")+
+        '<br><small>实际执行情况：用户自述'+(linked?'；关联医嘱：'+esc(linked.text||"治疗医嘱"):'')+'</small>';
+    });
+    const aiSection = $("report-ai").checked ?
+      '<section class="report-section"><h3>AI 功能说明（非医学建议）</h3><p>本原型未运行任何医学分析模型或危险信号分诊。正式产品中 AI 推断必须与事实分区、可追溯且经过医学安全验证。</p></section>' : "";
+    const followup = full ?
+      '<section class="report-section"><h3>就医及医疗机构信息（用户转录）</h3>'+encountersHtml+'</section>'+
+      '<section class="report-section"><h3>医生开具的医嘱 / 处方（尚不代表执行）</h3>'+orderHtml+'</section>'+
+      '<section class="report-section"><h3>实际治疗执行记录（用户自述）</h3>'+treatmentHtml+'</section>' : "";
     $("report-content").innerHTML =
-      '<div class="report-title"><span class="eyebrow">HEALTH / VISIT SUMMARY</span><h2>个人健康事件摘要</h2><p>由本人记录生成 · 演示数据 · 仅供就医沟通流程测试</p></div>' +
-      '<div class="report-meta"><span>事件：' + esc(e.title) + '</span><span>开始：' + dayFmt(e.start) + '</span><span>状态：' + esc(e.status) + '</span></div>' +
-      '<section class="report-section"><h3>主要不适与部位</h3><p>' + (symptoms.length ? esc(symptoms.map(function (s) { return (s.symptoms || []).join("、"); }).filter(Boolean).join(" / ") || "症状未分类") : "暂无症状记录") + '</p><p>涉及部位：' + esc(allZones.join("、") || (symptoms.some(function (s) { return s.unlocated; }) ? "全身 / 位置不明" : "位置未记录")) + '</p>' + (bodyFigures ? '<div style="display:flex;gap:12px;justify-content:flex-start;flex-wrap:wrap">' + bodyFigures + '</div>' : "") + '</section>' +
-      '<section class="report-section"><h3>病程与处理时间线</h3>' + (timeline || '<p>暂无详细记录。</p>') + '</section>' +
-      '<section class="report-section"><h3>实际用药摘要</h3>' + (medication.length ? '<ul>' + medication.map(function (m) { return '<li>' + esc(fmt(m.when) + " · " + m.name + " · " + m.dose + m.unit) + '</li>'; }).join("") + '</ul>' : '<p>没有记录实际用药。</p>') + '</section>' +
-      '<section class="report-section"><h3>就医时可进一步说明</h3><p>请与医生核对发作时间、诱发/缓解因素、既往类似情况和实际服药明细。未记录的信息不代表不存在。</p></section>' +
-      aiSection + '<div class="report-foot">本摘要由演示记录自动整理，来源：用户自述（虚构）。不代表任何医生诊断或疾病排除结论。生成时间：' + esc(new Date().toLocaleString("zh-CN")) + '。</div>';
+      '<div class="report-title"><span class="eyebrow">HEALTH / VISIT SUMMARY</span><h2>'+
+      (full?'就医与治疗全程档案':'就医前健康情况摘要')+'</h2><p>由本人记录生成 · 全部为演示数据 · 用于就医沟通流程测试</p></div>'+
+      '<div class="report-meta"><span>事件：'+esc(e.title)+'</span><span>开始：'+dayFmt(e.start)+'</span><span>状态：'+esc(e.status)+'</span></div>'+
+      '<section class="report-section"><h3>主要不适与部位</h3><p>'+
+      (symptoms.length?esc(symptoms.map(function(x){return (x.symptoms||[]).join("、");}).filter(Boolean).join(" / ")||"未分类症状"):"暂无症状记录")+
+      '</p><p>涉及部位：'+esc(allZones.join("、")||(symptoms.some(function(x){return x.unlocated;})?"全身 / 位置不明确":"位置未记录"))+
+      '</p>'+(bodyFigures?'<div style="display:flex;gap:12px;justify-content:flex-start;flex-wrap:wrap">'+bodyFigures+'</div>':'')+'</section>'+
+      '<section class="report-section"><h3>症状'+(full?'与就医处理':'与实际用药')+'时间线</h3>'+(timeline||'<p>暂无详细记录。</p>')+'</section>'+
+      '<section class="report-section"><h3>实际用药（与处方分开）</h3>'+medicationHtml+'</section>'+followup+
+      '<section class="report-section"><h3>供医生进一步核对的问题</h3><p>发作过程、既往相关经历、当前用药、医生医嘱的准确内容与后续治疗安排。未填写的信息不代表不存在。</p></section>'+
+      aiSection+'<div class="report-foot">资料来源：用户自述与转录（虚构）。医生医嘱和处方需与原件核对；标记“已执行”不替代实际用药或治疗记录。不是诊断或急救建议。报告生成：'+esc(new Date().toLocaleString("zh-CN"))+'。</div>';
   }
-  const questions = [
-    { text: "这次不舒服是突然出现，还是逐渐开始的？", options: ["突然开始", "逐渐出现", "说不清"] },
-    { text: "这种不舒服是持续存在，还是一阵一阵出现？", options: ["持续存在", "间歇出现", "不确定"] },
-    { text: "和刚开始相比，目前的感觉有什么变化？", options: ["更明显了", "有所减轻", "差不多", "不清楚"] }
+  const commonQuestions = [
+    {text:"这次不舒服是突然出现，还是逐渐开始的？",options:["突然开始","逐渐出现","说不清"]},
+    {text:"这种不舒服是持续存在，还是一阵一阵出现？",options:["持续存在","间歇出现","不确定"]},
+    {text:"与刚开始相比，目前的感觉有什么变化？",options:["更明显了","有所减轻","差不多","不清楚"]}
   ];
-  function renderQA() {
-    const panel = $("qa-panel");
-    if (state.qaIndex >= questions.length) {
-      panel.innerHTML = '<div class="qa-finished"><h4>✓ 问询体验已完成</h4><p>以下仅是演示中收集的信息，没有进行疾病分析、紧急程度判定或用药评价。</p><ul>' +
-        state.qaAnswers.map(function (a, i) { return '<li>' + esc(questions[i].text + " " + a) + '</li>'; }).join("") +
-        '</ul><p><strong>正式产品设计：</strong>在医学审核和数据授权前，系统只帮助整理事实，不生成个性化风险等级。</p><button type="button" class="btn btn-outline" id="restart-qa">重新体验</button></div>';
-      return;
+  // A deterministic UI demonstration, not clinical triage or model output.
+  function questionsForEvent() {
+    const e=eventById($("qa-event").value)||currentEvent();
+    if(!e)return commonQuestions;
+    const data=e.entries.filter(function(x){return x.kind==="symptom";});
+    const zones=data.flatMap(function(en){return (en.zones||[]).map(function(z){return z.key;});});
+    const symptoms=data.flatMap(function(en){return en.symptoms||[];});
+    let prefix=[];
+    if(zones.some(function(z){return /abd|navel/.test(z);})) {
+      prefix=[{text:"这次腹部不适与进食时间有什么关系？",options:["饭前更明显","饭后更明显","暂未发现关系","不清楚"]}];
+    } else if(zones.some(function(z){return /head|neck/.test(z);}) || symptoms.includes("头晕")) {
+      prefix=[{text:"不适的主要位置是否发生过变化？",options:["位置比较固定","位置有变化","说不清"]}];
+    } else if(zones.some(function(z){return /chest/.test(z);})) {
+      prefix=[{text:"不适是否影响了你平时的活动？",options:["有影响","没有明显影响","不清楚"]}];
+    } else if(zones.some(function(z){return /arm|hand|thigh|calf|shoulder|lumbar/.test(z);})) {
+      prefix=[{text:"这些不适和身体活动有没有时间上的关联？",options:["活动时更明显","休息时更明显","暂未发现关系","不清楚"]}];
     }
-    const question = questions[state.qaIndex];
-    panel.innerHTML = '<div class="qa-box"><small>问题 ' + (state.qaIndex + 1) + ' / ' + questions.length + '</small><h4>' + esc(question.text) + '</h4><div class="qa-choices">' +
-      question.options.map(function (option) { return '<button type="button" data-answer="' + esc(option) + '">' + esc(option) + '</button>'; }).join("") +
-      '</div></div><p class="form-footnote">允许选择“不确定”；这些回答只展示交互，不生成医疗结论。</p>';
+    return prefix.concat(commonQuestions).slice(0,4);
+  }
+  function renderQA() {
+    const panel=$("qa-panel"),questions=questionsForEvent();
+    if(state.qaIndex>=questions.length) {
+      panel.innerHTML='<div class="qa-finished"><h4>✓ 本次模拟补充问询已结束</h4><p>以下内容只用于演示如何收集病程信息，没有任何疾病分析或紧急程度判断。</p><ul>'+
+        state.qaAnswers.map(function(a,i){return '<li>'+esc(questions[i].text+" "+a)+'</li>';}).join("")+
+        '</ul><p><strong>正式产品限制：</strong>按症状引导问询的内容必须通过医学评审；紧急风险不能由大模型擅自判断或降级。</p>'+
+        '<button type="button" class="btn btn-outline" id="restart-qa">重新体验</button></div>';return;
+    }
+    const q=questions[state.qaIndex];
+    panel.innerHTML='<div class="qa-box"><small>问题 '+(state.qaIndex+1)+' / '+questions.length+' · 事件感知问询示例</small><h4>'+esc(q.text)+'</h4>'+
+      '<div class="qa-choices">'+q.options.map(function(option){return '<button type="button" data-answer="'+esc(option)+'">'+esc(option)+'</button>';}).join("")+
+      '</div></div><p class="form-footnote">根据事件的症状/部位选择预设问题，不调用 AI；支持“说不清”。</p>';
   }
   function renderEverything() {
     renderBody(); renderChips(); renderStats(); renderHome(); populateEventSelects();
@@ -413,8 +474,10 @@
   function reportAsText() {
     const event = eventById($("report-event").value || state.currentEventId);
     if (!event) return "";
-    const all = event.entries.slice().sort(function (a, b) { return new Date(a.when) - new Date(b.when); });
-    return ["个人健康事件摘要（演示数据）", "事件：" + event.title, "开始：" + dayFmt(event.start), "状态：" + event.status, "", "记录时间线:"]
+    const full = $("report-mode").value === "followup";
+    const all = event.entries.filter(function(e){return full || e.kind==="symptom" || e.kind==="med";})
+      .sort(function (a, b) { return new Date(a.when) - new Date(b.when); });
+    return [full ? "就医与治疗全程档案（演示数据）" : "就医前健康情况摘要（演示数据）", "事件：" + event.title, "开始：" + dayFmt(event.start), "状态：" + event.status, "", "记录时间线:"]
       .concat(all.map(function (entry) { return fmt(entry.when) + " " + entryTitle(entry) + "；" + entryDescription(entry); }))
       .concat(["", "声明：资料来自用户自述/虚构演示数据，仅用于就医沟通，不构成诊断。"]).join("\n");
   }
@@ -489,6 +552,8 @@
     $("save-order").addEventListener("click",saveOrder);
     $("save-treatment").addEventListener("click",saveTreatment);
     $("report-event").addEventListener("change", function () { state.currentEventId = this.value; renderReport(); });
+    $("report-mode").addEventListener("change",renderReport);
+    $("qa-event").addEventListener("change",function(){state.qaIndex=0;state.qaAnswers=[];renderQA();});
     $("report-ai").addEventListener("change", renderReport);
     $("print-report").addEventListener("click", function () { renderReport(); window.print(); });
     $("copy-report").addEventListener("click", async function () {
