@@ -60,6 +60,7 @@
             <div class="segmented" role="group" aria-label="人体视角"><button id="switch-front" class="active" type="button">正面</button><button id="switch-back" type="button">背面</button></div>
             <div class="body-stage"><svg id="body-svg" viewBox="0 0 320 500" role="img" aria-label="可交互人体部位示意图"></svg><span class="stage-label" id="body-side">正面视图</span></div>
             <div class="zone-detail" id="zone-detail" aria-live="polite"><strong>点击人体区域，选择更具体的位置</strong><p>可选整体区域，或点击二级细分区域。</p></div>
+            <div class="field-group radiation-field"><label class="field-label">不适是否从一个位置延伸到另一个位置？ <span class="optional">选填 · 仅记录描述</span></label><div class="input-pair"><select id="radiate-from" class="field-input" aria-label="起始位置"><option value="">起始位置</option></select><select id="radiate-to" class="field-input" aria-label="延伸至"><option value="">延伸至</option></select></div><small class="helper">只记录本人描述的放射方向，不做病因判断。</small></div>
             <div class="zone-summary"><strong>已选区域</strong><div id="selected-areas" class="area-tags"><span class="muted">尚未选择，可直接填写症状</span></div></div>
             <button class="plain-choice" id="unlocated" type="button">◎ 全身不适 / 说不清具体位置</button>
           </div>
