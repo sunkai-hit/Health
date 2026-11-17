@@ -229,10 +229,13 @@
   function entryDescription(entry) {
     if (entry.kind === "visit") return entry.notes || "就医信息由用户录入，需与原始医疗文书核对";
     if (entry.kind === "order") return (entry.text || "医嘱内容未填写") +
+      (entry.items && entry.items.length ? " · 药品明细："+entry.items.map(function(x){return x.name;}).join("、") : "") +
+      (entry.dueDate ? " · 计划日期："+entry.dueDate : "")+
+      (entry.supersedes ? " · 替代了先前医嘱（保留历史）":"")+
       " · " + (entry.sourceType === "document" ? "用户根据文书转录，未验证原件" : "用户回忆，待核实") +
       " · " + (executionNames[entry.executionStatus] || "尚未确认");
     if (entry.kind === "treatment") return entry.details || "用户记录实际发生的治疗";
-    if (entry.kind === "med") return (entry.notes || "实际用药记录（由用户确认）") + (entry.orderId ? " · 已关联处方记录" : " · 未关联处方");
+    if (entry.kind === "med") return (entry.notes || "实际用药记录（由用户确认）") + (entry.orderId ? " · 已关联处方记录" : " · 未关联处方") + (entry.itemId ? " · 已关联具体药品" : "");
     return (entry.severity == null ? "不适程度未评分" : "不适程度 " + entry.severity + "/10") +
       (entry.radiation ? " · 从" + entry.radiation.from + "延伸至" + entry.radiation.to : "") +
       (entry.notes ? " · " + entry.notes : "");
@@ -259,15 +262,79 @@
       return '<option value="' + esc(en.id) + '">' + esc(fmt(en.when) + " · " + caption(en)) + '</option>';
     }).join("");
   }
+
+  // Each structured item is a transcription only, never a prescribing action.
+  let rxCounter=0, photoUrl=null;
+  function getRxItems(){
+    return Array.from(document.querySelectorAll("#rx-items .rx-item")).map(function(row){
+      const value=function(sel){return row.querySelector(sel).value.trim();};
+      return {id:row.dataset.rxId,name:value(".rx-name"),strength:value(".rx-strength"),
+        doseText:value(".rx-dose"),frequency:value(".rx-frequency"),duration:value(".rx-duration")};
+    });
+  }
+  function renderRxItems(items){
+    $("rx-items").innerHTML=items.map(function(item,i){
+      const val=function(key){return esc(item[key]||"");};
+      return '<div class="rx-item" data-rx-id="'+esc(item.id)+'">'+
+        '<div class="rx-item-top"><strong>处方药品 '+(i+1)+'</strong><button type="button" class="light-btn" data-remove-rx="'+esc(item.id)+'">移除</button></div>'+
+        '<label class="field-label">药品名称</label><input class="field-input rx-name" value="'+val("name")+'" placeholder="虚构药品名">'+
+        '<div class="rx-grid">'+
+        '<div><label class="field-label">规格原文</label><input class="field-input rx-strength" value="'+val("strength")+'" placeholder="可不填"></div>'+
+        '<div><label class="field-label">单次用量原文</label><input class="field-input rx-dose" value="'+val("doseText")+'" placeholder="可不填"></div>'+
+        '<div><label class="field-label">频次原文</label><input class="field-input rx-frequency" value="'+val("frequency")+'" placeholder="可不填"></div>'+
+        '<div><label class="field-label">疗程原文</label><input class="field-input rx-duration" value="'+val("duration")+'" placeholder="可不填"></div></div></div>';
+    }).join("");
+  }
+  function addRx(){
+    const items=getRxItems();
+    if(items.length>=5){notify("原型最多演示5项，正式版另行评估");return;}
+    items.push({id:"rx-"+(++rxCounter),name:"",strength:"",doseText:"",frequency:"",duration:""});
+    renderRxItems(items);
+  }
+  function showOrderFields(){
+    $("rx-section").hidden=$("order-type").value!=="prescription";
+    $("followup-field").hidden=$("order-type").value!=="followup";
+  }
+  function renderMedItems(){
+    const e=eventById($("med-event").value)||currentEvent();
+    const o=e && e.entries.find(function(a){return a.id===$("med-order").value&&a.kind==="order";});
+    const items=o&&o.items||[];
+    $("med-item-block").hidden=!items.length;
+    $("med-item").innerHTML='<option value="">仅关联整张处方 / 不确定哪一项</option>'+
+      items.map(function(item){return '<option value="'+esc(item.id)+'">'+esc(item.name)+'</option>';}).join("");
+  }
+  function showLocalPhoto(){
+    if(photoUrl){URL.revokeObjectURL(photoUrl);photoUrl=null;}
+    const f=$("order-photo").files[0],box=$("order-photo-preview");
+    box.replaceChildren();
+    if(!f){box.textContent="尚未选择图片；无 OCR，不上传、不保存。";return;}
+    if(f.size>8*1024*1024 || !(f.type.startsWith("image/")||f.type==="application/pdf")){
+      $("order-photo").value="";box.textContent="仅限 8MB 以下的图片/PDF 虚构测试文件。";return;
+    }
+    const p=document.createElement("p");p.textContent="仅本地预览："+f.name+"；不上传、不随记录保存、无 OCR。";box.appendChild(p);
+    if(f.type.startsWith("image/")){
+      photoUrl=URL.createObjectURL(f);
+      const img=document.createElement("img");img.src=photoUrl;img.alt="本地虚构处方图片预览";box.appendChild(img);
+    }
+  }
+  function clearLocalPhoto(){
+    if(photoUrl){URL.revokeObjectURL(photoUrl);photoUrl=null;}
+    $("order-photo").value="";$("order-photo-preview").textContent="未保存原件；可重新选择本地图片。";
+  }
   function renderLinkedChoices() {
     const careEvent = eventById($("care-event").value) || currentEvent();
     const medEvent = eventById($("med-event").value) || currentEvent();
     if (careEvent) {
       $("order-visit").innerHTML = selectOptions(careEvent.entries.filter(function (e) { return e.kind === "visit"; }), "未关联具体就诊", function(e) {return e.hospital||"就医";});
       $("treatment-order").innerHTML = selectOptions(careEvent.entries.filter(function (e) { return e.kind === "order" && e.orderType === "treatment"; }), "未关联治疗医嘱", function(e) {return e.text || "治疗建议";});
+      $("order-supersedes").innerHTML=selectOptions(careEvent.entries.filter(function(e){return e.kind==="order";}),"新增医嘱（不替代旧医嘱）",function(e){return e.text.slice(0,36);});
+      $("visit-followup").innerHTML=selectOptions(careEvent.entries.filter(function(e){return e.kind==="order"&&e.orderType==="followup";}),"本次就诊未关联复诊计划",function(e){return e.text.slice(0,36);});
     }
     if (medEvent) {
-      $("med-order").innerHTML = selectOptions(medEvent.entries.filter(function (e) { return e.kind === "order" && e.orderType === "prescription"; }), "未关联 / 自行记录实际用药", function(e) {return e.text || "处方";});
+      const previous=$("med-order").value;
+      $("med-order").innerHTML=selectOptions(medEvent.entries.filter(function(e){return e.kind==="order"&&e.orderType==="prescription";}),"未关联 / 自行记录实际用药",function(e){return e.text || "处方";});
+      if(medEvent.entries.some(function(e){return e.id===previous&&e.orderType==="prescription";}))$("med-order").value=previous;
+      renderMedItems();
     }
   }
   function renderCare() {
