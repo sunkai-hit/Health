@@ -1,14 +1,14 @@
 import { parseEvent, parseSymptom, InputError, type EventInput, type SymptomInput } from './domain';
 import { importKey, encrypt, decrypt } from './crypto';
 import { demoHTML } from './demo-ui';
+import { importDemoAuthKey,issueLocalToken,verifyLocalToken,type DemoIdentity } from './dev-auth';
 
 interface Env {
   DB: D1Database;
   DEMO_MODE?: string;
   DEMO_KEY_BASE64?: string;
+  DEMO_AUTH_SECRET_BASE64?: string;
 }
-const OWNER = 'synthetic-owner-v1';
-const PROFILE = 'synthetic-profile-v1';
 const MAX_BODY_BYTES = 16_000;
 const HEADERS = { 'content-type':'application/json; charset=utf-8', 'cache-control':'no-store','x-content-type-options':'nosniff' };
 const now = () => new Date().toISOString();
@@ -20,11 +20,13 @@ async function localKey(request:Request,env:Env) {
   if(env.DEMO_MODE!=='local' || !['localhost','127.0.0.1','[::1]'].includes(host))return null;
   return importKey(env.DEMO_KEY_BASE64);
 }
-async function ensureDemo(db:D1Database){
+async function ensureDemo(db:D1Database,user:DemoIdentity){
   const time=now();
   await db.batch([
-    db.prepare('INSERT OR IGNORE INTO user_accounts(id,auth_subject,created_at,updated_at) VALUES(?,?,?,?)').bind(OWNER,'synthetic|local-demo',time,time),
-    db.prepare('INSERT OR IGNORE INTO health_profiles(id,owner_user_id,created_at,updated_at) VALUES(?,?,?,?)').bind(PROFILE,OWNER,time,time)
+    db.prepare('INSERT OR IGNORE INTO user_accounts(id,auth_subject,created_at,updated_at) VALUES(?,?,?,?)')
+      .bind(user.ownerId,'synthetic|'+user.persona,time,time),
+    db.prepare('INSERT OR IGNORE INTO health_profiles(id,owner_user_id,created_at,updated_at) VALUES(?,?,?,?)')
+      .bind(user.profileId,user.ownerId,time,time)
   ]);
 }
 async function readJson(req:Request):Promise<unknown>{
@@ -38,40 +40,40 @@ type EventRow={
   id:string;status:string;title_ciphertext:unknown;onset_at:string|null;
   onset_precision:string;created_at:string;updated_at:string;version:number;
 };
-async function getEvent(db:D1Database,id:string):Promise<EventRow|null>{
+async function getEvent(db:D1Database,id:string,user:DemoIdentity):Promise<EventRow|null>{
   if(!/^[0-9a-f-]{36}$/.test(id))return null;
   return db.prepare('SELECT id,status,title_ciphertext,onset_at,onset_precision,created_at,updated_at,version FROM health_events WHERE id=? AND profile_id=?')
-    .bind(id,PROFILE).first<EventRow>();
+    .bind(id,user.profileId).first<EventRow>();
 }
 async function visibleEvent(key:CryptoKey,row:EventRow) {
   return {id:row.id,title:await decrypt<string>(key,'event-title:'+row.id,row.title_ciphertext),
     status:row.status,onset_at:row.onset_at,onset_precision:row.onset_precision,
     created_at:row.created_at,updated_at:row.updated_at,version:row.version};
 }
-async function allEvents(db:D1Database,key:CryptoKey){
-  const result=await db.prepare('SELECT id,status,title_ciphertext,onset_at,onset_precision,created_at,updated_at,version FROM health_events WHERE profile_id=? ORDER BY created_at DESC LIMIT 100').bind(PROFILE).all<EventRow>();
+async function allEvents(db:D1Database,key:CryptoKey,user:DemoIdentity){
+  const result=await db.prepare('SELECT id,status,title_ciphertext,onset_at,onset_precision,created_at,updated_at,version FROM health_events WHERE profile_id=? ORDER BY created_at DESC LIMIT 100').bind(user.profileId).all<EventRow>();
   return json({items:await Promise.all((result.results||[]).map(row=>visibleEvent(key,row)))});
 }
-async function makeEvent(db:D1Database,key:CryptoKey,input:EventInput){
+async function makeEvent(db:D1Database,key:CryptoKey,user:DemoIdentity,input:EventInput){
   const id=crypto.randomUUID(),time=now();
   const encrypted=await encrypt(key,'event-title:'+id,input.title);
   await db.batch([
     db.prepare('INSERT INTO health_events(id,profile_id,status,title_ciphertext,onset_at,onset_precision,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?)')
-      .bind(id,PROFILE,'open',encrypted,input.onset_at,input.onset_precision,time,time),
+      .bind(id,user.profileId,'open',encrypted,input.onset_at,input.onset_precision,time,time),
     db.prepare('INSERT INTO record_revisions(id,owner_user_id,resource_type,resource_id,action,new_version,changed_at) VALUES(?,?,?,?,?,?,?)')
-      .bind(crypto.randomUUID(),OWNER,'health_event',id,'create',1,time),
+      .bind(crypto.randomUUID(),user.ownerId,'health_event',id,'create',1,time),
     db.prepare('INSERT INTO audit_events(id,actor_user_id,action_code,resource_type,resource_id,result_code,occurred_at) VALUES(?,?,?,?,?,?,?)')
-      .bind(crypto.randomUUID(),OWNER,'CREATE','health_event',id,'OK',time)
+      .bind(crypto.randomUUID(),user.ownerId,'CREATE','health_event',id,'OK',time)
   ]);
   return json({item:{id,title:input.title,status:'open',onset_at:input.onset_at,
     onset_precision:input.onset_precision,created_at:time,updated_at:time,version:1}},201);
 }
 type EntryRow={id:string;event_id:string;entry_type:string;occurred_at:string|null;occurred_precision:string;payload_ciphertext:unknown;source_type:string;created_at:string;};
 type MarkRow={id:string;entry_id:string;view:string;map_version:string;mark_ciphertext:unknown;};
-async function allEntries(db:D1Database,key:CryptoKey,eventId:string){
+async function allEntries(db:D1Database,key:CryptoKey,eventId:string,user:DemoIdentity){
   const [e,m]=await db.batch([
-    db.prepare('SELECT id,event_id,entry_type,occurred_at,occurred_precision,payload_ciphertext,source_type,created_at FROM event_entries WHERE event_id=? AND deleted_at IS NULL ORDER BY occurred_at ASC,created_at ASC').bind(eventId),
-    db.prepare('SELECT b.id,b.entry_id,b.view,b.map_version,b.mark_ciphertext FROM body_marks b JOIN event_entries e ON e.id=b.entry_id WHERE e.event_id=? AND e.deleted_at IS NULL ORDER BY b.created_at,b.id').bind(eventId)
+    db.prepare('SELECT e.id,e.event_id,e.entry_type,e.occurred_at,e.occurred_precision,e.payload_ciphertext,e.source_type,e.created_at FROM event_entries e JOIN health_events h ON h.id=e.event_id WHERE e.event_id=? AND h.profile_id=? AND e.deleted_at IS NULL ORDER BY e.occurred_at ASC,e.created_at ASC').bind(eventId,user.profileId),
+    db.prepare('SELECT b.id,b.entry_id,b.view,b.map_version,b.mark_ciphertext FROM body_marks b JOIN event_entries e ON e.id=b.entry_id JOIN health_events h ON h.id=e.event_id WHERE e.event_id=? AND h.profile_id=? AND e.deleted_at IS NULL ORDER BY b.created_at,b.id').bind(eventId,user.profileId)
   ]);
   const marks=(m.results||[]) as MarkRow[];
   const markMap=new Map<string,Array<{view:string;zone_code:string;segment_code:string|null}>>();
@@ -86,7 +88,7 @@ async function allEntries(db:D1Database,key:CryptoKey,eventId:string){
       created_at:row.created_at,...value,body_marks:markMap.get(row.id)||[]};
   }));
 }
-async function makeSymptom(db:D1Database,key:CryptoKey,eventId:string,input:SymptomInput){
+async function makeSymptom(db:D1Database,key:CryptoKey,eventId:string,user:DemoIdentity,input:SymptomInput){
   const id=crypto.randomUUID(),time=now();
   const {body_marks,...payload}=input;
   const encrypted=await encrypt(key,'symptom:'+id,payload);
@@ -101,9 +103,9 @@ async function makeSymptom(db:D1Database,key:CryptoKey,eventId:string,input:Symp
       .bind(markId,id,'v1',mark.view,blob,time));
   }
   stmts.push(db.prepare('INSERT INTO record_revisions(id,owner_user_id,resource_type,resource_id,action,new_version,changed_at) VALUES(?,?,?,?,?,?,?)')
-    .bind(crypto.randomUUID(),OWNER,'event_entry',id,'create',1,time));
+    .bind(crypto.randomUUID(),user.ownerId,'event_entry',id,'create',1,time));
   stmts.push(db.prepare('INSERT INTO audit_events(id,actor_user_id,action_code,resource_type,resource_id,result_code,occurred_at) VALUES(?,?,?,?,?,?,?)')
-    .bind(crypto.randomUUID(),OWNER,'CREATE','event_entry',id,'OK',time));
+    .bind(crypto.randomUUID(),user.ownerId,'CREATE','event_entry',id,'OK',time));
   await db.batch(stmts);
   return json({item:{id,event_id:eventId,kind:'symptom',...input,source_type:'self_report',created_at:time}},201);
 }
@@ -120,21 +122,35 @@ const worker:ExportedHandler<Env>={
           'content-security-policy':"default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'none'"
         }});
       }
-      if(path==='/api/v1/health' && request.method==='GET')return json({status:'ok',mode:'synthetic-local-demo',medical_analysis:false});
+      if(path==='/api/v1/health' && request.method==='GET')return json({status:'ok',mode:'synthetic-local-demo',medical_analysis:false,auth_demo:true});
       if(!path.startsWith('/api/v1/'))return failure('NOT_FOUND','路径不存在',404);
-      await ensureDemo(env.DB);
+      const authKey=await importDemoAuthKey(env.DEMO_AUTH_SECRET_BASE64);
+      // Local synthetic persona factory, not a production login or identity proof.
+      if(path==='/api/v1/dev/session' && request.method==='POST'){
+        const payload=await readJson(request);
+        if(!payload||typeof payload!=='object'||Array.isArray(payload)
+           ||Object.keys(payload).length!==1||!('persona' in payload)
+           ||(payload.persona!=='alice'&&payload.persona!=='bob')){
+          throw new InputError('INVALID_PERSONA','只支持虚构账号 alice 或 bob');
+        }
+        return json(await issueLocalToken(payload.persona,authKey));
+      }
+      const user=await verifyLocalToken(request.headers.get('authorization'),authKey);
+      if(!user)return failure('UNAUTHENTICATED','演示令牌缺失、无效或过期',401);
+      if(path==='/api/v1/me'&&request.method==='GET')return json({persona:user.persona,display_name:user.displayName,mode:'synthetic-only'});
+      await ensureDemo(env.DB,user);
       if(path==='/api/v1/events'){
-        if(request.method==='GET')return allEvents(env.DB,key);
-        if(request.method==='POST')return makeEvent(env.DB,key,parseEvent(await readJson(request)));
+        if(request.method==='GET')return allEvents(env.DB,key,user);
+        if(request.method==='POST')return makeEvent(env.DB,key,user,parseEvent(await readJson(request)));
         return failure('METHOD_NOT_ALLOWED','不支持的方法',405);
       }
       const match=path.match(/^\/api\/v1\/events\/([0-9a-f-]{36})(?:\/(entries))?$/);
       if(!match)return failure('NOT_FOUND','资源不存在',404);
-      const record=await getEvent(env.DB,match[1]);
+      const record=await getEvent(env.DB,match[1],user);
       if(!record)return failure('NOT_FOUND','资源不存在',404);
-      if(!match[2]&&request.method==='GET')return json({item:await visibleEvent(key,record),entries:await allEntries(env.DB,key,match[1])});
-      if(match[2]==='entries'&&request.method==='GET')return json({items:await allEntries(env.DB,key,match[1])});
-      if(match[2]==='entries'&&request.method==='POST')return makeSymptom(env.DB,key,match[1],parseSymptom(await readJson(request)));
+      if(!match[2]&&request.method==='GET')return json({item:await visibleEvent(key,record),entries:await allEntries(env.DB,key,match[1],user)});
+      if(match[2]==='entries'&&request.method==='GET')return json({items:await allEntries(env.DB,key,match[1],user)});
+      if(match[2]==='entries'&&request.method==='POST')return makeSymptom(env.DB,key,match[1],user,parseSymptom(await readJson(request)));
       return failure('METHOD_NOT_ALLOWED','不支持的方法',405);
     }catch(error){
       if(error instanceof InputError)return failure(error.code,error.message,error.status);
