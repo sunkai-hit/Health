@@ -77,7 +77,9 @@ export async function verifyLocalToken(header:string|null,key:CryptoKey):Promise
     const unsigned=pieces[0]+'.'+pieces[1];
     const sig=decodeBase64Url(pieces[2]);
     if(sig.byteLength!==32)return null;
-    const checked=await crypto.subtle.verify('HMAC',key,sig.buffer,encoder.encode(unsigned));
+    const stableSignature=new Uint8Array(sig.byteLength);
+    stableSignature.set(sig);
+    const checked=await crypto.subtle.verify('HMAC',key,stableSignature.buffer,encoder.encode(unsigned));
     if(!checked)return null;
     const claim=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(decodeBase64Url(pieces[1]))) as Record<string,unknown>;
     const t=Math.floor(Date.now()/1000);
