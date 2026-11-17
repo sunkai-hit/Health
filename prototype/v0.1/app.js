@@ -258,7 +258,7 @@
     e.entries.push({ id: "s-" + Date.now(), kind: "symptom", when: when, zones: zones, unlocated: state.unlocated, symptoms: symptoms, severity: severity, notes: notes });
     state.currentEventId = e.id;
     state.symptoms.clear(); state.zones.clear(); state.unlocated = false;
-    $("symptom-notes").value = ""; $("severity").value = 5; $("severity-unknown").checked = false; $("severity").disabled = false; $("severity-value").textContent = "5";
+    $("symptom-notes").value = ""; $("severity").value = 5; $("severity-unknown").checked = true; $("severity").disabled = true; $("severity-value").textContent = "未评分";
     renderEverything(); notify("已保存症状，并关联到健康事件"); go("events");
   }
   function saveMedication() {
@@ -320,8 +320,8 @@
       if (state.symptoms.has(btn.dataset.symptom)) state.symptoms.delete(btn.dataset.symptom); else state.symptoms.add(btn.dataset.symptom);
       renderChips();
     });
-    $("severity").addEventListener("input", function () { $("severity-value").textContent = this.value; });
-    $("severity-unknown").addEventListener("change", function () { $("severity").disabled = this.checked; });
+    $("severity").addEventListener("input", function () { $("severity-value").textContent = this.value + " / 10"; });
+    $("severity-unknown").addEventListener("change", function () { $("severity").disabled = this.checked; $("severity-value").textContent = this.checked ? "未评分" : $("severity").value + " / 10"; });
     $("save-symptom").addEventListener("click", saveSymptom);
     $("save-med").addEventListener("click", saveMedication);
     $("report-event").addEventListener("change", function () { state.currentEventId = this.value; renderReport(); });
