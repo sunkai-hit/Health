@@ -153,3 +153,38 @@ erDiagram
 - 建议将所有时间线条目统一附加 \`encounter_id\`、\`instruction_id\`、\`source_type\` 及修改记录，以支持历史审计。
 
 业务关系及验收案例详见 [CARE-AND-ORDERS-V0.1.md](./CARE-AND-ORDERS-V0.1.md)。
+
+
+## 7. 处方项目、医嘱版本和复诊关系深化（2026-11-17）
+
+### 7.1 PrescriptionItem
+
+- \`id\`, \`instruction_id\`, \`name_original\`, \`strength_original\`, \`dose_original\`, \`frequency_original\`, \`duration_original\`
+- \`source_type\`, \`confirmation_state\`, \`created_at\`, \`version\`
+- 保留不可预测的稳定 ID 与原始文本；缺失字段设为 null / unknown，不填推测值。
+- \`MedicationUse.prescription_item_id\` 可空；\`MedicationUse.instruction_id\` 可空。关联只记录引用，不代表剂量及疗程一致。
+
+### 7.2 ClinicianInstruction 版本与状态
+
+- \`supersedes_instruction_id\` 可空：新旧医嘱版本单向关联（不得形成循环或跨用户关联）。
+- \`status_source\`、\`changed_at\`、\`change_reason_original\`：待正式版补齐来源与医学确认属性。
+- 原医嘱原文和来源不可被新版静默覆盖；为历史用药保留对应版本指向。
+- 原型仅支持同类型版本替代关系，非医院正式撤销/停药认证。
+
+### 7.3 FollowupPlan（建议独立概念）
+
+- 可以在 V0.1 用 \`instruction_type=followup\` 表示，字段 \`due_date_original\`、\`purpose_original\` 与 \`encounter_id\`。
+- \`Encounter.followup_instruction_id\` 可空，作为用户主动记录的计划与实际复诊关联。
+- 计划日期是医嘱原文的转录，不自动推算未来计划或创建实际就诊。
+- 对照统计仅计算已关联 Encounter 数量，不能从 0 推断未就诊。
+
+### 7.4 本地处方图片的安全边界
+
+- 原型仅在浏览器内对虚构图片创建短暂预览，不读取医疗内容做 OCR，不上传、不保留文件对象。
+- 正式附件需独立 \`MedicalAttachment\` 及加密对象存储、文件完整性校验、访问权限、审计、删除和最小化 AI 授权。
+- 图片 OCR 草稿应保留原文、转换记录、待核验字段状态，不能直接创建“已由医生确认”的处方。
+
+### 7.5 报告字段
+
+- 新增 \`instruction_version_refs\`、\`included_prescription_item_ids\`、\`linked_actual_entry_ids\`、\`followup_plan_refs\`。
+- 报告中“未见已关联用药/治疗/复诊”不等于现实中未发生。
