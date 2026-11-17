@@ -366,18 +366,35 @@
   function saveVisit(){
     const when=$("visit-date").value || currentLocal(),hospital=$("visit-hospital").value.trim(),department=$("visit-dept").value.trim(),notes=$("visit-note").value.trim();
     if(!hospital && !department && !notes){notify("请至少填写医疗机构、科室或医生意见");return;}
-    if(createCareEntry({id:"v-"+Date.now(),kind:"visit",when,hospital:hospital.slice(0,120),department:department.slice(0,120),notes:notes.slice(0,2000),sourceType:"self"})){
-      $("visit-hospital").value="";$("visit-dept").value="";$("visit-note").value="";
+    if(createCareEntry({id:"v-"+Date.now(),kind:"visit",when,hospital:hospital.slice(0,120),department:department.slice(0,120),notes:notes.slice(0,2000),sourceType:"self",followupOrderId:$("visit-followup").value})){
+      $("visit-hospital").value="";$("visit-dept").value="";$("visit-note").value="";$("visit-followup").value="";
     }
   }
   function saveOrder(){
-    const textValue=$("order-text").value.trim();
-    if(!textValue){notify("请填写医嘱原文或用户回忆内容");return;}
-    if(createCareEntry({
-      id:"o-"+Date.now(),kind:"order",when:$("order-time").value||currentLocal(),
-      visitId:$("order-visit").value,orderType:$("order-type").value,
-      text:textValue.slice(0,2500),sourceType:$("order-source").value,executionStatus:$("order-status").value
-    })){$("order-text").value="";$("order-visit").value="";$("order-status").value="unknown";}
+    const type=$("order-type").value,textValue=$("order-text").value.trim();
+    const all=type==="prescription"?getRxItems():[];
+    if(all.some(function(x){return !x.name&&(x.strength||x.doseText||x.frequency||x.duration);})){
+      notify("处方明细存在缺少药名的条目，请核对或删除");return;
+    }
+    const items=all.filter(function(x){return x.name;}).map(function(x){
+      return {id:x.id,name:x.name.slice(0,120),strength:x.strength.slice(0,100),
+        doseText:x.doseText.slice(0,120),frequency:x.frequency.slice(0,120),duration:x.duration.slice(0,120)};
+    });
+    if(!textValue&&!items.length){notify("请输入医嘱原文或至少一项药品明细");return;}
+    const supersedes=$("order-supersedes").value;
+    const ev=eventById($("care-event").value);
+    const old=ev&&ev.entries.find(function(x){return x.id===supersedes&&x.kind==="order";});
+    if(supersedes&&(!old||old.orderType!==type)){notify("替代关系必须选择同类型旧医嘱");return;}
+    const item={id:"o-"+Date.now(),kind:"order",when:$("order-time").value||currentLocal(),
+      visitId:$("order-visit").value,orderType:type,text:textValue.slice(0,2500),
+      items,dueDate:type==="followup"?$("order-due").value:"",
+      supersedes:supersedes||null,sourceType:$("order-source").value,
+      executionStatus:$("order-status").value};
+    if(createCareEntry(item)){
+      $("order-text").value="";$("order-visit").value="";
+      $("order-status").value="unknown";$("order-supersedes").value="";$("order-due").value="";
+      renderRxItems([]);addRx();clearLocalPhoto();
+    }
   }
   function saveTreatment(){
     const name=$("treatment-name").value.trim();
@@ -535,7 +552,7 @@
     const event = eventById($("med-event").value);
     if (!name || !dose) { notify("请填写药名和实际服用量；无法确认请不要猜测"); return; }
     if (!event) { notify("请先新建健康事件，再记录本次用药"); return; }
-    event.entries.push({ id: "m-" + Date.now(), kind: "med", when: when, name: name.slice(0, 120), dose: dose.slice(0, 60), unit: $("med-unit").value, notes: $("med-note").value.trim(),orderId:$("med-order").value });
+    event.entries.push({ id: "m-" + Date.now(), kind: "med", when: when, name: name.slice(0, 120), dose: dose.slice(0, 60), unit: $("med-unit").value, notes: $("med-note").value.trim(),orderId:$("med-order").value,itemId:$("med-item").value });
     state.currentEventId = event.id;
     state.qaIndex=0;state.qaAnswers=[];
     $("med-name").value = ""; $("med-dose").value = ""; $("med-note").value = "";
@@ -616,6 +633,14 @@
     $("severity-unknown").addEventListener("change", function () { $("severity").disabled = this.checked; $("severity-value").textContent = this.checked ? "未评分" : $("severity").value + " / 10"; });
     $("save-symptom").addEventListener("click", saveSymptom);
     $("save-med").addEventListener("click", saveMedication);
+    $("med-order").addEventListener("change",renderMedItems);
+    $("order-type").addEventListener("change",showOrderFields);
+    $("order-photo").addEventListener("change",showLocalPhoto);
+    $("add-rx-item").addEventListener("click",addRx);
+    $("rx-items").addEventListener("click",function(event){
+      const btn=event.target.closest("[data-remove-rx]");if(!btn)return;
+      renderRxItems(getRxItems().filter(function(x){return x.id!==btn.dataset.removeRx;}));
+    });
     ["care-event","med-event"].forEach(function(id){$(id).addEventListener("change",function(){renderLinkedChoices();if(id==="care-event")renderCare();});});
     document.querySelectorAll("[data-care-tab]").forEach(function(btn){btn.addEventListener("click",function(){selectCareTab(btn.dataset.careTab);});});
     $("save-visit").addEventListener("click",saveVisit);
@@ -640,6 +665,7 @@
     $("symptom-onset").value = currentLocal();
     $("med-time").value = currentLocal();
     ["visit-date","order-time","treatment-time"].forEach(function(id){$(id).value=currentLocal();});
+    addRx();showOrderFields();
     bind(); renderEverything(); go("home");
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
