@@ -1,45 +1,41 @@
-# Health 微信小程序 S4 · 原生只读演示
+# Health 微信小程序｜原生只读研发演示
 
-## 当前阶段
+## 项目配置
 
-**这是原生微信小程序框架，不是正式可登录/可存储医疗信息的版本。**
+- 微信小程序 AppID：`wx027f1a9c66e3c01a`（由项目方提供，已写入 `project.config.json`）。
+- AppID 是应用公开标识；**尚未核验该 AppID 的主体、管理权限、备案、类目或微信平台审核状态**。
+- **不需要、也不允许把 AppSecret、session_key 或真实健康记录提交到仓库。**
+- 本阶段工程仍只含虚构示例，不会因为配置 AppID 就开启真实微信登录。
 
-- 首批用户：中国大陆
-- 客户端：微信小程序（非 WebView/PWA）
-- 已提供：首页、虚构健康事件时间线（只读、打包在项目内）
-- 未启用：真正微信登录、任何远程请求/数据库、健康事件录入、个人信息收集、文件上传、AI 或医疗建议
+## 在微信开发者工具中查看
 
-## 本地查看
+1. 从 GitHub 获取 `feature/mvp-s4-wechat-foundation` 分支代码。
+2. 打开微信开发者工具，选择“导入项目”，项目目录选择仓库中的 `miniapp/`。
+3. 开发者工具应该识别 `project.config.json` 中的 AppID `wx027f1a9c66e3c01a`；使用有相应项目权限的微信账号登录。
+4. 编译并查看首页、虚构事件时间线。如微信工具提示权限、主体或项目配置问题，需要在微信公众平台核对，不能通过代码推断账户状态。
+5. 不尝试上传真实病历或发布为真实健康信息服务。**真实微信开发者工具编译、手机真机运行和平台审核尚未完成验收。**
 
-1. 安装并打开[微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)。
-2. 选择导入项目，目录定位到仓库中的 \`miniapp/\`。
-3. \`project.config.json\` 使用 **\`touristappid\`（仅供游客/测试态调试）**，它不是正式 AppID，不能发布。若开发者工具提示需 AppID，可在本机开发者工具里选择合法测试号/自有小程序 AppID；**不要把真实 AppSecret 写入项目**。
-4. 预览首页和只读虚构时间线。不要录入真实资料；当前没有真正的存储/登录/远程请求。
-5. 当前自动化只验证静态工程结构、禁用网络/存储和后端微信身份适配器的模拟调用；尚未完成微信开发者工具或真机验收。
+## 当前实现范围
 
-## 研发结构
-
-\`\`\`text
+```text
 miniapp/
-  app.json            小程序页面路由和全局配置
-  app.js              只读虚构演示初始化
-  app.wxss            小程序基础视觉样式
-  sitemap.json        演示内容不允许搜索收录
-  project.config.json 游客测试标识，不可发布
-  pages/index/        首页
-  pages/timeline/     虚构健康事件时间线
-\`\`\`
+  app.json               原生页面路由
+  app.js                 虚构演示启动，不调用 wx.login
+  app.wxss               基础 UI 样式
+  project.config.json    已配置用户提供的 AppID；不含 Secret
+  sitemap.json           演示页禁止搜索收录
+  pages/index/           首页（只读）
+  pages/timeline/        虚构健康事件时间线（只读）
+```
 
-暂不加入输入表单，是为了防止还没有正式身份授权和安全数据管理时误把真实健康信息写入前端或开发环境。
+目前客户端没有 `wx.login()`、`wx.request()`、真实资料录入、个人信息收集或本地持久化；这些约束由 `npm run test:wechat` 的自动化检查保护。
 
-## 未来登录流程（本轮不开放）
+## 下一阶段的真实登录安全链路
 
-\`wx.login()\` 获取一次性 code → 小程序通过已备案 HTTPS API 域名发给后端 → 后端利用受控 AppID/AppSecret 交换 \`openid\` / \`session_key\` → 服务端将 \`appid+openid\` 映射为 Health 内部用户 → 建立可撤销 Health 会话 → 在用户获得医疗健康敏感信息单独同意后开放事件录入。
+未来经过审核后实现：`wx.login()` 获取一次性 `code` → 微信小程序通过已配置的 HTTPS 合法请求域名发给 Health 境内后端 → 后端使用保存在 Secret/KMS 中的 AppSecret 调用微信 `code2Session` → 将 `appid + openid` 映射为 Health 内部用户 → 签发可撤销的 Health 自有会话。
 
-- \`session_key\` 与 AppSecret 严禁返回前端；\`openid\` 不当作直接可用于 API 的登录令牌。
-- 首发不强制绑定手机号；后续业务如确有必要再设计独立用户授权。
-- 选择中国大陆合规可用的云商及 API 域名、完成小程序/网站备案、平台隐私指引与敏感信息处理告知，都是上线前置条件。
-- 旧 \`prototype/v0.1\` 是业务/UX 原型；S1～S3 Worker + D1 为**本地合成数据 API 研发基线**，不能直接部署为面向中国大陆真实用户的健康数据服务。
-- 真实身份、会话、KMS 和正式后端需要单独实施并完整通过安全验收。
+当前 `src/auth/wechat-code-exchange.ts` **仅实现服务端身份交换适配函数并通过模拟测试**，尚未提供公开 API，也未真实调用微信平台。不向小程序返回 AppSecret 或 `session_key`，不强制手机号绑定。
 
-完整架构决策：[ADR-0001](../docs/ADR-0001-CHINA-WECHAT-LAUNCH.md)；[S4 边界](../docs/SPRINT-S4-WECHAT-SCOPE.md)。
+上线前仍须确认小程序主体与管理员权限、备案与类目资质、境内后端部署及域名、敏感个人信息告知与单独同意、KMS/加密及导出删除能力。
+
+详见 [首发架构决策](../docs/ADR-0001-CHINA-WECHAT-LAUNCH.md)、[S4 范围](../docs/SPRINT-S4-WECHAT-SCOPE.md)、[S4 验收](../docs/SPRINT-S4-ACCEPTANCE.md)。
