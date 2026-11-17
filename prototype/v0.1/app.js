@@ -11,7 +11,10 @@
     status: "进行中", entries: [
       { id: "demo-s1", kind: "symptom", when: "2026-11-15T08:30", zones: [{ key: "front:upper-abd", label: "上腹部" }], symptoms: ["胀痛", "恶心"], severity: 6, notes: "上午开始感觉腹部胀痛，伴轻微恶心。（虚构）" },
       { id: "demo-m1", kind: "med", when: "2026-11-15T09:10", name: "演示药品 A（虚构）", dose: "1", unit: "片", notes: "记录一次实际用药；不代表任何用药建议。" },
-      { id: "demo-s2", kind: "symptom", when: "2026-11-15T11:30", zones: [{ key: "front:upper-abd", label: "上腹部" }], symptoms: ["胀痛"], severity: 3, notes: "主观不适程度有所减轻。（虚构）" }
+      { id: "demo-s2", kind: "symptom", when: "2026-11-15T11:30", zones: [{ key: "front:upper-abd", label: "上腹部" }], symptoms: ["胀痛"], severity: 3, notes: "主观不适程度有所减轻。（虚构）" },
+      { id: "demo-v1", kind: "visit", when: "2026-11-16T10:00", hospital: "演示医疗机构（虚构）", department: "演示门诊", notes: "医生具体意见由患者转录，待与正式医疗文书核对。（虚构）" },
+      { id: "demo-o1", kind: "order", when: "2026-11-16T10:20", visitId: "demo-v1", orderType: "followup", text: "示例：医生建议复诊时带上此前的检查记录（完全虚构）", sourceType: "self", executionStatus: "unknown" },
+      { id: "demo-t1", kind: "treatment", when: "2026-11-16T10:45", name: "虚构的门诊处理项目", details: "仅用于展示治疗执行与医嘱分开的记录方式。", orderId: "" }
     ]
   };
   let state = {
@@ -205,16 +208,31 @@
     r.innerHTML = '<option value="new">＋ 新建健康事件</option>' + options;
     r.value = rv === "new" || eventById(rv) ? rv : "new";
     m.innerHTML = options; p.innerHTML = options;
+    $("care-event").innerHTML = options;
+    $("qa-event").innerHTML = options;
     m.value = state.currentEventId; p.value = state.currentEventId;
+    $("care-event").value = state.currentEventId;
+    $("qa-event").value = state.currentEventId;
+    renderLinkedChoices();
   }
+  const orderNames = { prescription:"处方 / 用药医嘱", treatment:"治疗建议",test:"检查建议",followup:"复诊 / 复查", lifestyle:"生活方式注意事项", other:"其他医嘱" };
+  const executionNames = {unknown:"尚未确认", not_started:"未执行", in_progress:"执行中", completed:"用户报告已执行（需核对执行记录）"};
   function entryTitle(entry) {
+    if (entry.kind === "visit") return "就医：" + (entry.hospital || "机构未记录") + (entry.department ? " · "+entry.department : "");
+    if (entry.kind === "order") return "医生医嘱（转录）：" + (orderNames[entry.orderType] || "其他医嘱");
+    if (entry.kind === "treatment") return "实际治疗：" + entry.name;
     if (entry.kind === "med") return "服用：" + entry.name + " · " + entry.dose + entry.unit;
     const types = (entry.symptoms || []).join("、") || "未分类症状";
     const area = (entry.zones || []).map(function (x) { return x.label; }).join("、") || (entry.unlocated ? "全身 / 位置不明" : "位置未注明");
     return area + " · " + types;
   }
   function entryDescription(entry) {
-    if (entry.kind === "med") return entry.notes || "实际用药记录（由用户确认）";
+    if (entry.kind === "visit") return entry.notes || "就医信息由用户录入，需与原始医疗文书核对";
+    if (entry.kind === "order") return (entry.text || "医嘱内容未填写") +
+      " · " + (entry.sourceType === "document" ? "用户根据文书转录，未验证原件" : "用户回忆，待核实") +
+      " · " + (executionNames[entry.executionStatus] || "尚未确认");
+    if (entry.kind === "treatment") return entry.details || "用户记录实际发生的治疗";
+    if (entry.kind === "med") return (entry.notes || "实际用药记录（由用户确认）") + (entry.orderId ? " · 已关联处方记录" : " · 未关联处方");
     return (entry.severity == null ? "不适程度未评分" : "不适程度 " + entry.severity + "/10") +
       (entry.radiation ? " · 从" + entry.radiation.from + "延伸至" + entry.radiation.to : "") +
       (entry.notes ? " · " + entry.notes : "");
@@ -227,12 +245,79 @@
     if (!e) { $("event-detail").innerHTML = '<div class="empty">还没有健康事件</div>'; return; }
     const sorted = e.entries.slice().sort(function (a, b) { return new Date(a.when) - new Date(b.when); });
     const timeline = sorted.map(function (en) {
-      return '<div class="timeline-item' + (en.kind === "med" ? ' med' : '') + '"><span class="timeline-dot"></span><small>' + fmt(en.when) + ' · ' + (en.kind === "med" ? "用药记录" : "症状记录") + ' · 用户自述</small><strong>' +
+      const type = en.kind === "med" ? "实际用药" : en.kind === "visit" ? "就医" : en.kind === "order" ? "医嘱/处方" : en.kind === "treatment" ? "实际治疗" : "症状";
+      return '<div class="timeline-item' + (en.kind === "med" ? ' med' : '') + '"><span class="timeline-dot"></span><small>' + fmt(en.when) + ' · ' + type + ' · 用户录入（未核实）</small><strong>' +
         esc(entryTitle(en)) + '</strong><p>' + esc(entryDescription(en)) + '</p></div>';
     }).join("");
     $("event-detail").innerHTML = '<div class="detail-top"><div><h3>' + esc(e.title) + '</h3><p>' + dayFmt(e.start) + ' 开始 · ' + e.entries.length + ' 条记录</p></div><span class="status-pill">' + esc(e.status) + '</span></div>' +
-      '<div class="detail-actions"><button type="button" class="light-btn" data-nav="record">＋ 记录新症状</button><button type="button" class="light-btn" data-nav="medication">＋ 记录用药</button><button type="button" class="light-btn" id="open-report">查看报告</button><button type="button" class="light-btn" id="toggle-event">' + (e.status === "进行中" ? "标记已结束" : "重新开启") + '</button></div>' +
+      '<div class="detail-actions"><button type="button" class="light-btn" data-nav="record">＋ 记录新症状</button><button type="button" class="light-btn" data-nav="medication">＋ 记录用药</button><button type="button" class="light-btn" data-nav="care">＋ 就医/医嘱/治疗</button><button type="button" class="light-btn" id="open-report">查看报告</button><button type="button" class="light-btn" id="toggle-event">' + (e.status === "进行中" ? "标记已结束" : "重新开启") + '</button></div>' +
       '<h3 style="font-size:15px;margin:25px 0 12px">事件时间线</h3><div class="timeline">' + (timeline || '<div class="empty">还没有记录</div>') + '</div>';
+  }
+
+  function selectOptions(entries, placeholder, caption) {
+    return '<option value="">' + placeholder + '</option>' + entries.map(function (en) {
+      return '<option value="' + esc(en.id) + '">' + esc(fmt(en.when) + " · " + caption(en)) + '</option>';
+    }).join("");
+  }
+  function renderLinkedChoices() {
+    const careEvent = eventById($("care-event").value) || currentEvent();
+    const medEvent = eventById($("med-event").value) || currentEvent();
+    if (careEvent) {
+      $("order-visit").innerHTML = selectOptions(careEvent.entries.filter(function (e) { return e.kind === "visit"; }), "未关联具体就诊", function(e) {return e.hospital||"就医";});
+      $("treatment-order").innerHTML = selectOptions(careEvent.entries.filter(function (e) { return e.kind === "order" && e.orderType === "treatment"; }), "未关联治疗医嘱", function(e) {return e.text || "治疗建议";});
+    }
+    if (medEvent) {
+      $("med-order").innerHTML = selectOptions(medEvent.entries.filter(function (e) { return e.kind === "order" && e.orderType === "prescription"; }), "未关联 / 自行记录实际用药", function(e) {return e.text || "处方";});
+    }
+  }
+  function renderCare() {
+    const event = eventById($("care-event").value) || currentEvent();
+    if (!event) { $("care-list").innerHTML = '<div class="empty">请先创建健康事件</div>';return; }
+    const care = event.entries.filter(function(en){return ["visit","order","treatment"].includes(en.kind);});
+    care.sort(function(a,b){return new Date(b.when)-new Date(a.when);});
+    $("care-list").innerHTML = care.length ? care.map(function(en){
+      const badge = en.kind === "visit" ? "就医" : en.kind === "order" ? "医嘱 / 处方" : "治疗执行";
+      return '<div class="med-list-item"><span class="status-pill">'+badge+'</span><strong class="care-item-title">'+esc(entryTitle(en))+'</strong><p>'+
+        esc(fmt(en.when))+'</p><p>'+esc(entryDescription(en))+'</p></div>';
+    }).join(""):'<div class="empty">该事件还没有就医、医嘱或实际治疗记录</div>';
+  }
+  function selectCareTab(tab) {
+    document.querySelectorAll("[data-care-tab]").forEach(function(btn){btn.classList.toggle("active",btn.dataset.careTab===tab);});
+    document.querySelectorAll(".care-form").forEach(function(el){el.classList.toggle("active",el.id==="care-"+tab+"-form");});
+  }
+  function createCareEntry(entry) {
+    const event=eventById($("care-event").value);
+    if(!event){notify("请先建立健康事件");return false;}
+    event.entries.push(entry);
+    state.currentEventId=event.id;
+    renderEverything();
+    $("care-event").value=event.id; renderLinkedChoices();renderCare();
+    notify("记录已保存：医嘱与实际执行会分开展示");
+    return true;
+  }
+  function saveVisit(){
+    const when=$("visit-date").value || currentLocal(),hospital=$("visit-hospital").value.trim(),department=$("visit-dept").value.trim(),notes=$("visit-note").value.trim();
+    if(!hospital && !department && !notes){notify("请至少填写医疗机构、科室或医生意见");return;}
+    if(createCareEntry({id:"v-"+Date.now(),kind:"visit",when,hospital:hospital.slice(0,120),department:department.slice(0,120),notes:notes.slice(0,2000),sourceType:"self"})){
+      $("visit-hospital").value="";$("visit-dept").value="";$("visit-note").value="";
+    }
+  }
+  function saveOrder(){
+    const textValue=$("order-text").value.trim();
+    if(!textValue){notify("请填写医嘱原文或用户回忆内容");return;}
+    if(createCareEntry({
+      id:"o-"+Date.now(),kind:"order",when:$("order-time").value||currentLocal(),
+      visitId:$("order-visit").value,orderType:$("order-type").value,
+      text:textValue.slice(0,2500),sourceType:$("order-source").value,executionStatus:$("order-status").value
+    })){$("order-text").value="";$("order-visit").value="";$("order-status").value="unknown";}
+  }
+  function saveTreatment(){
+    const name=$("treatment-name").value.trim();
+    if(!name){notify("请填写实际进行的治疗项目");return;}
+    if(createCareEntry({
+      id:"t-"+Date.now(),kind:"treatment",when:$("treatment-time").value||currentLocal(),
+      name:name.slice(0,200),details:$("treatment-detail").value.trim().slice(0,2000),orderId:$("treatment-order").value,sourceType:"self"
+    })){$("treatment-name").value="";$("treatment-detail").value="";$("treatment-order").value="";}
   }
   function renderMedication() {
     const meds = [];
@@ -289,7 +374,7 @@
   }
   function renderEverything() {
     renderBody(); renderChips(); renderStats(); renderHome(); populateEventSelects();
-    renderEvents(); renderMedication(); renderReport(); renderQA();
+    renderEvents(); renderMedication(); renderCare(); renderReport(); renderQA();
   }
   function saveSymptom() {
     const symptoms = Array.from(state.symptoms), zones = Array.from(state.zones.entries()).map(function (pair) { return { key: pair[0], label: pair[1] }; });
@@ -320,7 +405,7 @@
     const event = eventById($("med-event").value);
     if (!name || !dose) { notify("请填写药名和实际服用量；无法确认请不要猜测"); return; }
     if (!event) { notify("请先新建健康事件，再记录本次用药"); return; }
-    event.entries.push({ id: "m-" + Date.now(), kind: "med", when: when, name: name.slice(0, 120), dose: dose.slice(0, 60), unit: $("med-unit").value, notes: $("med-note").value.trim() });
+    event.entries.push({ id: "m-" + Date.now(), kind: "med", when: when, name: name.slice(0, 120), dose: dose.slice(0, 60), unit: $("med-unit").value, notes: $("med-note").value.trim(),orderId:$("med-order").value });
     state.currentEventId = event.id;
     $("med-name").value = ""; $("med-dose").value = ""; $("med-note").value = "";
     renderEverything(); notify("实际用药记录已关联到健康事件"); go("events");
@@ -398,6 +483,11 @@
     $("severity-unknown").addEventListener("change", function () { $("severity").disabled = this.checked; $("severity-value").textContent = this.checked ? "未评分" : $("severity").value + " / 10"; });
     $("save-symptom").addEventListener("click", saveSymptom);
     $("save-med").addEventListener("click", saveMedication);
+    ["care-event","med-event"].forEach(function(id){$(id).addEventListener("change",function(){renderLinkedChoices();if(id==="care-event")renderCare();});});
+    document.querySelectorAll("[data-care-tab]").forEach(function(btn){btn.addEventListener("click",function(){selectCareTab(btn.dataset.careTab);});});
+    $("save-visit").addEventListener("click",saveVisit);
+    $("save-order").addEventListener("click",saveOrder);
+    $("save-treatment").addEventListener("click",saveTreatment);
     $("report-event").addEventListener("change", function () { state.currentEventId = this.value; renderReport(); });
     $("report-ai").addEventListener("change", renderReport);
     $("print-report").addEventListener("click", function () { renderReport(); window.print(); });
@@ -414,6 +504,7 @@
   function init() {
     $("symptom-onset").value = currentLocal();
     $("med-time").value = currentLocal();
+    ["visit-date","order-time","treatment-time"].forEach(function(id){$(id).value=currentLocal();});
     bind(); renderEverything(); go("home");
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
