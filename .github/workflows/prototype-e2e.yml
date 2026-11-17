@@ -24,6 +24,7 @@ on:
       - 'feature/mvp-s2-browser-qa'
       - 'feature/mvp-s3-auth-boundary'
       - 'feature/mvp-s4-wechat-foundation'
+      - 'feature/mvp-s5-cloudbase-dev'
     paths:
       - 'prototype/**'
       - 'tests/**'
@@ -179,3 +180,20 @@ jobs:
         run: npm run check:types
       - name: Verify default release bundle still blocks the demo
         run: npm run test:release-guard
+
+
+  cloudbase-dev:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Verify synthetic CloudBase test gates without a cloud environment
+        run: npm run test:cloudbase
+      - name: Check Mini Program project and server-side login mock tests
+        run: |
+          npm install --no-audit --no-fund
+          npm run test:wechat
