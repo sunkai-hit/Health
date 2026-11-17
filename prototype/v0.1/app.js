@@ -337,11 +337,60 @@
       renderMedItems();
     }
   }
+
+  function orderSnapshot(event){
+    const orders=event.entries.filter(function(e){return e.kind==="order";});
+    const superseded=new Set(orders.map(function(o){return o.supersedes;}).filter(Boolean));
+    const meds=event.entries.filter(function(e){return e.kind==="med";});
+    const treatments=event.entries.filter(function(e){return e.kind==="treatment";});
+    const visits=event.entries.filter(function(e){return e.kind==="visit";});
+    return {orders,superseded,meds,treatments,visits};
+  }
+  function renderOrderComparison(event){
+    const d=orderSnapshot(event);
+    if(!d.orders.length)return '<div class="empty">尚无医生医嘱（未记录不代表不存在）</div>';
+    return '<p class="helper">以下仅统计明确关联的实际记录次数，不能据此判断是否遵医嘱或是否已经完成疗程。</p>'+
+      d.orders.slice().sort(function(a,b){return new Date(b.when)-new Date(a.when);}).map(function(o){
+        const old=d.superseded.has(o.id);
+        const uses=d.meds.filter(function(m){return m.orderId===o.id;});
+        const done=d.treatments.filter(function(t){return t.orderId===o.id;});
+        const followed=d.visits.filter(function(v){return v.followupOrderId===o.id;});
+        let linked='';
+        if(o.orderType==="prescription"){
+          const itemRows=(o.items||[]).map(function(item){
+            const count=uses.filter(function(m){return m.itemId===item.id;}).length;
+            return '<div class="compare-line"><span>'+esc(item.name||"未命名药品")+
+              '</span><span>'+count+' 条已关联的实际用药记录</span></div>';
+          }).join("");
+          linked=itemRows+(uses.some(function(m){return !m.itemId;})?
+            '<div class="compare-line"><span>未明确对应药品</span><span>'+uses.filter(function(m){return !m.itemId;}).length+' 条关联整方的记录</span></div>':'');
+          if(!linked)linked='<p class="helper">暂无关联实际用药记录；不代表未服用。</p>';
+        } else if(o.orderType==="treatment")linked='<p class="helper">关联的实际治疗记录：'+done.length+' 条；未记录不等于未治疗。</p>';
+        else if(o.orderType==="followup")linked='<p class="helper">建议日期：'+esc(o.dueDate||"未填写")+
+          ' · 关联的实际就诊记录：'+followed.length+' 条；未记录不代表未就诊。</p>';
+        return '<div class="compare-card"><div class="compare-heading"><strong>'+esc(orderNames[o.orderType]||"医嘱")+
+          '</strong><span class="status-pill">'+(old?"已有后续替代版本":"当前无后续替代记录")+'</span></div>'+
+          '<p>'+esc(o.text||"原文未另填")+'</p>'+linked+'</div>';
+      }).join("");
+  }
+  function renderFollowupPlan(event){
+    const d=orderSnapshot(event);
+    const plans=d.orders.filter(function(o){return o.orderType==="followup"&&!d.superseded.has(o.id);});
+    if(!plans.length)return "";
+    return '<div class="plan-list"><h4>复诊 / 复查计划（用户转录）</h4>'+
+      plans.map(function(o){
+        const done=d.visits.filter(function(v){return v.followupOrderId===o.id;});
+        return '<div class="plan-item"><strong>'+esc(o.dueDate||"日期未明确")+'</strong><span>'+
+          esc(o.text||"复诊/复查")+'</span><small>已关联实际就诊 '+done.length+' 次；未登记不代表未就诊</small></div>';
+      }).join("")+'</div>';
+  }
   function renderCare() {
     const event = eventById($("care-event").value) || currentEvent();
     if (!event) { $("care-list").innerHTML = '<div class="empty">请先创建健康事件</div>';return; }
     const care = event.entries.filter(function(en){return ["visit","order","treatment"].includes(en.kind);});
     care.sort(function(a,b){return new Date(b.when)-new Date(a.when);});
+    $("order-comparison").innerHTML=renderOrderComparison(event);
+    $("followup-overview").innerHTML=renderFollowupPlan(event);
     $("care-list").innerHTML = care.length ? care.map(function(en){
       const badge = en.kind === "visit" ? "就医" : en.kind === "order" ? "医嘱 / 处方" : "治疗执行";
       return '<div class="med-list-item"><span class="status-pill">'+badge+'</span><strong class="care-item-title">'+esc(entryTitle(en))+'</strong><p>'+
@@ -440,10 +489,12 @@
       return items.length ? '<ul>'+items.map(function(item){return '<li>'+transform(item)+'</li>';}).join("")+'</ul>' :
         '<p>暂无相应记录；未记录不代表未发生。</p>';
     };
+    const comparisonHtml=renderOrderComparison(e),followupPlanHtml=renderFollowupPlan(e);
     const medicationHtml = li(medication,function(m){
       const linked = m.orderId ? orders.find(function(o){return o.id===m.orderId;}) : null;
       return '<strong>实际服用：</strong>'+esc(fmt(m.when)+' · '+m.name+' · '+m.dose+m.unit) +
-        (linked ? '<br><small>关联处方（用户转录）：'+esc(linked.text)+'</small>':'<br><small>未关联处方 / 医嘱</small>');
+        (linked ? '<br><small>关联处方（用户转录）：'+esc(linked.text)+'</small>':'<br><small>未关联处方 / 医嘱</small>')+
+        (linked && m.itemId ? '<br><small>对应处方药品：'+esc(((linked.items||[]).find(function(x){return x.id===m.itemId;})||{}).name||"明细未找到")+'</small>':'');
     });
     const encountersHtml = li(visits,function(v){
       return '<strong>'+esc(fmt(v.when)+' · '+(v.hospital||"机构未记录"))+'</strong>'+
@@ -452,8 +503,15 @@
     });
     const orderHtml = li(orders,function(o){
       const visit = o.visitId && visits.find(function(v){return v.id===o.visitId;});
+      const drugDetails=(o.items||[]).map(function(item){
+        return '<li>'+esc(item.name)+' · 规格 '+esc(item.strength||"不明")+' · 单次用量 '+esc(item.doseText||"不明")+
+          ' · 频次 '+esc(item.frequency||"不明")+' · 疗程 '+esc(item.duration||"不明")+'</li>';
+      }).join("");
+      const revision=o.supersedes?'<br><small>新版本：关联此前医嘱（保留旧记录）</small>':'';
       return '<strong>'+esc(fmt(o.when)+' · '+(orderNames[o.orderType]||"医嘱"))+'</strong><br>'+
-        esc(o.text||"医嘱内容未填写")+'<br><small>状态：'+esc(executionNames[o.executionStatus]||"尚未确认")+
+        esc(o.text||"医嘱原文未另填")+(drugDetails?'<ul>'+drugDetails+'</ul>':'')+
+        (o.dueDate?'<br><small>计划复诊/复查日期：'+esc(o.dueDate)+'</small>':'')+revision+
+        '<br><small>状态：'+esc(executionNames[o.executionStatus]||"尚未确认")+
         '；来源：'+esc(o.sourceType==="document"?"依据文书手工转录，原件未核验":"用户回忆/转录，待核实")+
         (visit?'；关联就诊：'+esc(visit.hospital||"已关联"):'')+'</small>';
     });
@@ -467,6 +525,8 @@
     const followup = full ?
       '<section class="report-section"><h3>就医及医疗机构信息（用户转录）</h3>'+encountersHtml+'</section>'+
       '<section class="report-section"><h3>医生开具的医嘱 / 处方（尚不代表执行）</h3>'+orderHtml+'</section>'+
+      '<section class="report-section"><h3>复诊 / 复查计划与已关联就诊</h3>'+(followupPlanHtml||'<p>暂无复诊计划记录。</p>')+'</section>'+
+      '<section class="report-section"><h3>医嘱与实际执行记录对照</h3>'+comparisonHtml+'</section>'+
       '<section class="report-section"><h3>实际治疗执行记录（用户自述）</h3>'+treatmentHtml+'</section>' : "";
     $("report-content").innerHTML =
       '<div class="report-title"><span class="eyebrow">HEALTH / VISIT SUMMARY</span><h2>'+
