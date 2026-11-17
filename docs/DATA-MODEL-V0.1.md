@@ -108,3 +108,48 @@ erDiagram
 - 历史数据编辑策略：直接更新+审计，还是全部以事件修订方式表示。
 - V0.1 是否完全个人单档案，以及首次登录方式。
 - PDF 是否只保留事件摘要，还是附上详细条目原始数据。
+
+
+---
+
+## 6. 2026-11-17 数据模型扩展：就医、医嘱与执行事实
+
+**重要分离：** \`Encounter\` = 实际就医；\`ClinicianInstruction\` = 医生提出的请求/建议（用户记录/转录）；\`MedicationUse\` = 用户报告实际用药；\`TreatmentPerformed\` = 用户报告实际接受的治疗。这四类实体不相互替代，也不因医嘱状态“已执行”而自动生成服药或治疗事实。
+
+### 6.1 Encounter（一次就医）
+
+- id, health_event_id, visited_at, facility_name, department, clinician_name (optional)
+- notes_original, diagnosis_reported (optional), source_type, source_attachment_ids
+- recorded_at, edited_at, user_confirmed_at
+
+用户录入“医生诊断”时必须标注来源为“用户转录/待核实”，不得让 AI 自动转为医学已确认的病史。
+
+### 6.2 ClinicianInstruction（医嘱/处方/建议）
+
+- id, health_event_id, encounter_id (optional), instruction_type (prescription/treatment/test/followup/lifestyle/other)
+- instruction_text_original, issued_at, source_type (self_report/document_transcribed/verified_import)
+- user_execution_status (unknown/not_started/in_progress/reported_completed)
+- source_attachment_ids, supersedes_instruction_id (optional), recorded_at, revised_at, confirmation_state
+- 对药物处方可扩展 \`PrescriptionItem\`：drug_name, strength, dosage, unit, route, frequency, start/end, duration, quantity, refills, unknown_fields。OCR 提取内容必须经用户核对。
+
+### 6.3 TreatmentPerformed（实际治疗执行）
+
+- id, event_id, instruction_id (optional), performed_at, treatment_name, quantity_or_sessions (optional)
+- facility, notes_user_reported, response_user_reported, source_type, recorded_at
+
+一条治疗医嘱可关联多条执行记录。治疗反应是用户自述，不等于疗效因果结论。
+
+### 6.4 MedicationUse 扩展
+
+- 新增 \`instruction_id\` 或 \`prescription_item_id\` 可空关联。
+- 实际用药与处方的药名/剂量分别保留，若不一致应如实展示，**不自动修正剂量，不自动给出停换药建议**。
+- 未记录实际服用 ≠ 未服用；医嘱标记“已完成” ≠ 系统已经核实所有服药记录。
+
+### 6.5 报告范围与来源字段
+
+- \`Report.report_mode\`：previsit（就医前事实摘要）/ full_course（含医嘱与治疗全程）
+- \`Report.included_entry_ids\`、\`source_snapshot_hash\`、\`generated_at\` 与可选 AI 附录。
+- 区分 \`self_report\`、\`document_transcribed\`、\`verified_import\`；原型当前仅支持前两者的文字类别，后者须真正集成可信机构来源后才能启用。
+- 建议将所有时间线条目统一附加 \`encounter_id\`、\`instruction_id\`、\`source_type\` 及修改记录，以支持历史审计。
+
+业务关系及验收案例详见 [CARE-AND-ORDERS-V0.1.md](./CARE-AND-ORDERS-V0.1.md)。
