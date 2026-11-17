@@ -17,6 +17,7 @@ on:
     branches:
       - 'docs/requirements-v0.1'
       - 'feature/mvp-s1-core'
+      - 'feature/mvp-s2-identity'
     paths:
       - 'prototype/**'
       - 'tests/**'
