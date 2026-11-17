@@ -1,0 +1,60 @@
+name: Health prototype and SQLite schema QA
+
+on:
+  pull_request:
+    paths:
+      - 'prototype/**'
+      - 'tests/**'
+      - 'db/**'
+      - 'playwright.config.mjs'
+      - 'package.json'
+      - '.github/workflows/prototype-e2e.yml'
+  push:
+    branches:
+      - 'docs/requirements-v0.1'
+    paths:
+      - 'prototype/**'
+      - 'tests/**'
+      - 'db/**'
+      - 'playwright.config.mjs'
+      - 'package.json'
+      - '.github/workflows/prototype-e2e.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sqlite-schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify schema using Python stdlib
+        run: python3 -m unittest discover -s db/tests -p 'test_*.py' -v
+
+  prototype-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright test runner
+        run: npm install --no-audit --no-fund
+      - name: Install headless Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Check JavaScript syntax
+        run: npm run check:js
+      - name: Run synthetic prototype browser tests
+        run: npm run test:prototype
+      - name: Upload failed-test traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
