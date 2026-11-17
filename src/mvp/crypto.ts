@@ -17,7 +17,9 @@ export async function importKey(base64:string|undefined):Promise<CryptoKey> {
   if (!base64) throw new Error('DEMO_KEY_NOT_CONFIGURED');
   const raw = bytes(base64);
   if (raw.byteLength !== 32) throw new Error('DEMO_KEY_INVALID');
-  return crypto.subtle.importKey('raw',raw,'AES-GCM',false,['encrypt','decrypt']);
+  const copy = new Uint8Array(raw.byteLength);
+  copy.set(raw);
+  return crypto.subtle.importKey('raw',copy.buffer,'AES-GCM',false,['encrypt','decrypt']);
 }
 export async function encrypt(key:CryptoKey, context:string, data:unknown):Promise<ArrayBuffer> {
   const iv = crypto.getRandomValues(new Uint8Array(12));
