@@ -1,0 +1,16 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/timeline/timeline"
+  ],
+  "window": {
+    "navigationBarTitleText": "Health · 健康记录",
+    "navigationBarBackgroundColor": "#F5FAF9",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F5FAF9"
+  },
+  "sitemapLocation": "sitemap.json",
+  "networkTimeout": {
+    "request": 10000
+  }
+}

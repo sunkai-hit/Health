@@ -10,6 +10,7 @@ on:
       - 'playwright.mvp.config.mjs'
       - 'package.json'
       - 'src/**'
+      - 'miniapp/**'
       - 'scripts/**'
       - 'wrangler.jsonc'
       - 'wrangler.local.jsonc'
@@ -22,6 +23,7 @@ on:
       - 'feature/mvp-s2-identity'
       - 'feature/mvp-s2-browser-qa'
       - 'feature/mvp-s3-auth-boundary'
+      - 'feature/mvp-s4-wechat-foundation'
     paths:
       - 'prototype/**'
       - 'tests/**'
@@ -30,6 +32,7 @@ on:
       - 'playwright.mvp.config.mjs'
       - 'package.json'
       - 'src/**'
+      - 'miniapp/**'
       - 'scripts/**'
       - 'wrangler.jsonc'
       - 'wrangler.local.jsonc'
@@ -157,3 +160,22 @@ jobs:
             exit 1
           fi
           echo 'Default release bundle contains no demo identities or signing secret references.'
+
+
+  wechat-mini-foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install test runner dependencies
+        run: npm install --no-audit --no-fund
+      - name: Verify native Mini Program and mock code2Session boundary
+        run: npm run test:wechat
+      - name: Check all backend auth modules type safety
+        run: npm run check:types
+      - name: Verify default release bundle still blocks the demo
+        run: npm run test:release-guard

@@ -1,0 +1,19 @@
+page {
+  background: #f5faf9;
+  color: #213c39;
+  font-size: 30rpx;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+.container { padding: 36rpx 30rpx 54rpx; }
+.hero { background: #117469; border-radius: 28rpx; padding: 48rpx 34rpx; color: #fff; }
+.title { font-size: 50rpx; font-weight: 700; }
+.subtitle { margin-top: 16rpx; font-size: 27rpx; line-height: 1.65; color: #def4ec; }
+.card { margin-top: 26rpx; padding: 34rpx 30rpx; border-radius: 24rpx; background: #fff; border: 1rpx solid #daeae6; }
+.card-title { font-size: 35rpx; font-weight: 650; color: #184f49; }
+.paragraph { font-size: 27rpx; line-height: 1.8; color: #536d66; margin-top: 18rpx; }
+.muted { color: #6b837c; font-size: 24rpx; }
+.notice { margin-top: 22rpx; padding: 22rpx 24rpx; border-radius: 16rpx; color: #725421; font-size: 25rpx; line-height: 1.7; background: #fff3db; border: 1rpx solid #efdcbc; }
+.tag { display: inline-block; background: #e2f2ed; color: #156d5f; border-radius: 10rpx; padding: 7rpx 16rpx; font-size: 23rpx; }
+.primary { margin-top: 28rpx; background: #147a6d; color: #fff; border-radius: 16rpx; font-size: 30rpx; }
+.primary:active { background: #125c53; }
+.divider { height: 1rpx; background: #e4eeeb; margin: 30rpx 0; }

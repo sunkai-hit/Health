@@ -1,0 +1,21 @@
+<view class="container">
+  <view class="notice">以下内容全部为虚构示例。小程序目前没有启用真实登录或个人健康资料保存。</view>
+  <block wx:for="{{events}}" wx:key="id">
+    <view class="card">
+      <view class="tag">虚构健康事件</view>
+      <view class="card-title" style="margin-top: 18rpx;">{{item.title}}</view>
+      <view class="paragraph">{{item.onset}}</view>
+      <view class="muted">{{item.status}}</view>
+      <block wx:for="{{item.entries}}" wx:key="id" wx:for-item="entry">
+        <view class="divider"></view>
+        <view class="card-title">{{entry.title}}</view>
+        <view class="paragraph">{{entry.text}}</view>
+        <view class="muted">{{entry.location}}</view>
+      </block>
+    </view>
+  </block>
+  <view class="card">
+    <view class="card-title">下一个功能是什么？</view>
+    <view class="paragraph">待正式微信身份、境内后端安全及敏感健康信息授权通过后，才开放真正的事件创建、症状记录和时间线查询。</view>
+  </view>
+</view>

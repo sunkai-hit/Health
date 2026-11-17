@@ -17,7 +17,8 @@
     "test:dev-ui": "playwright test --config=playwright.mvp.config.mjs",
     "test:release-guard": "node tests/release-guard.test.mjs",
     "test:auth-policy": "tsx --test tests/auth-policy.test.ts",
-    "check:release-bundle": "wrangler deploy --dry-run --config wrangler.jsonc --outdir .tmp/release-gate-build"
+    "check:release-bundle": "wrangler deploy --dry-run --config wrangler.jsonc --outdir .tmp/release-gate-build",
+    "test:wechat": "tsx --test tests/wechat-code-exchange.test.ts && node --test tests/miniapp-foundation.test.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
