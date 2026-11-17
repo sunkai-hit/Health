@@ -119,3 +119,12 @@
 
 
 **小程序 AppID 已配置（2026-11-18）：** `wx027f1a9c66e3c01a`，见 [`miniapp/project.config.json`](./miniapp/project.config.json)。这是公开应用标识，不是 AppSecret；平台权限/备案及真实登录尚未验证，也未开放健康数据收集。
+
+
+## S5 · 无自有服务器/HTTPS 域名的微信云开发研发方案（2026-11-18）
+
+- 项目方尚无云服务器或自有 HTTPS 域名；首发小程序优先采用 **微信·云开发 CloudBase（原生 wx.cloud）** 作为测试和后续候选架构。
+- [S5 Draft PR #23](https://github.com/sunkai-hit/Health/pull/23) · [ADR-0002](./docs/ADR-0002-S5-CLOUDBASE-BOOTSTRAP.md) · [S5 锁定范围](./docs/SPRINT-S5-CLOUDBASE-SCOPE.md) · [云开发开通说明](./miniapp/CLOUDBASE-SETUP.md)
+- 小程序新增只读云函数连接测试页和固定合成数据 \`healthDevPing\`，**仓库默认云开关关闭、环境 ID 为空，不会发生真实网络请求或存储健康数据**。
+- 该方案可通过 \`wx.cloud.callFunction\` 调用云函数，**不必先购买自有服务器或域名**；早期 \`code2Session\` 自建 API 方案转为备选。
+- **云开发环境尚未创建/绑定，云函数尚未实际部署；小程序备案、类目、敏感健康信息保护与正式发布审批仍为前置条件。**
