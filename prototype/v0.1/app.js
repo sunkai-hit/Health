@@ -13,7 +13,12 @@
       { id: "demo-m1", kind: "med", when: "2026-11-15T09:10", name: "演示药品 A（虚构）", dose: "1", unit: "片", notes: "记录一次实际用药；不代表任何用药建议。" },
       { id: "demo-s2", kind: "symptom", when: "2026-11-15T11:30", zones: [{ key: "front:upper-abd", label: "上腹部" }], symptoms: ["胀痛"], severity: 3, notes: "主观不适程度有所减轻。（虚构）" },
       { id: "demo-v1", kind: "visit", when: "2026-11-16T10:00", hospital: "演示医疗机构（虚构）", department: "演示门诊", notes: "医生具体意见由患者转录，待与正式医疗文书核对。（虚构）" },
-      { id: "demo-o1", kind: "order", when: "2026-11-16T10:20", visitId: "demo-v1", orderType: "followup", text: "示例：医生建议复诊时带上此前的检查记录（完全虚构）", sourceType: "self", executionStatus: "unknown" },
+      { id: "demo-o1", kind: "order", when: "2026-11-16T10:20", visitId: "demo-v1", orderType: "followup", text: "示例：医生建议复诊时带上此前的检查记录（完全虚构）", dueDate:"2026-11-25", sourceType: "self", executionStatus: "unknown" },
+      { id: "demo-o-old", kind:"order",when:"2026-11-16T10:23",visitId:"demo-v1",orderType:"prescription",text:"虚构的处方记录（旧版）",sourceType:"self",executionStatus:"unknown",
+        items:[{id:"demo-p-old",name:"虚构药品甲",strength:"未记录",doseText:"未记录",frequency:"未记录",duration:"未记录"}] },
+      { id: "demo-o-new", kind:"order",when:"2026-11-16T10:28",visitId:"demo-v1",orderType:"prescription",text:"虚构处方的新版本，仅用于演示变更历史",supersedes:"demo-o-old",sourceType:"document",executionStatus:"unknown",
+        items:[{id:"demo-p1",name:"虚构药品甲",strength:"未记录",doseText:"未记录",frequency:"未记录",duration:"未记录"},{id:"demo-p2",name:"虚构药品乙",strength:"未记录",doseText:"未记录",frequency:"未记录",duration:"未记录"}] },
+      {id:"demo-m2",kind:"med",when:"2026-11-16T12:00",name:"虚构药品甲",dose:"1",unit:"片",notes:"完全虚构的实际服用记录。",orderId:"demo-o-new",itemId:"demo-p1"},
       { id: "demo-t1", kind: "treatment", when: "2026-11-16T10:45", name: "虚构的门诊处理项目", details: "仅用于展示治疗执行与医嘱分开的记录方式。", orderId: "" }
     ]
   };
