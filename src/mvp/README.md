@@ -52,3 +52,16 @@ npm run test:prototype
 - 本轮不开发处方、用药、治疗、AI、OCR、PDF、数据同步等 API。
 
 详细范围见 [S2 范围文档](../../docs/SPRINT-S2-BOUNDARY.md)。已确认但未进入开发的产品需求仍在上游需求 PR 中保留。
+
+
+## 浏览器联调验收（新增 S2 QA）
+
+在运行 \`npm install\`、\`npm run dev:setup\`、\`npm run db:migrate:local\` 之后：
+
+\`\`\`bash
+npm run test:dev-ui
+\`\`\`
+
+此命令用专用 \`playwright.mvp.config.mjs\` 自动启动本地 Worker，真实连接本地 D1，按桌面与 390px 移动模拟视口分别运行六类场景，检查 A/B 切换、事件/症状归属、刷新、输入显示及异步切换竞态。无需预先运行 \`npm run dev:api\`；不要把测试服务暴露到局域网或公网上。
+
+最新已通过 [CI 44025858347](https://github.com/sunkai-hit/Health/actions/runs/44025858347)，详细见 [问题收敛记录](../../docs/SPRINT-S2-BROWSER-QA-RESULTS.md)。仍非真实设备、真实身份认证或生产数据安全验收。
