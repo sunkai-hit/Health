@@ -7,6 +7,7 @@ on:
       - 'tests/**'
       - 'db/**'
       - 'playwright.config.mjs'
+      - 'playwright.mvp.config.mjs'
       - 'package.json'
       - 'src/**'
       - 'scripts/**'
@@ -18,11 +19,13 @@ on:
       - 'docs/requirements-v0.1'
       - 'feature/mvp-s1-core'
       - 'feature/mvp-s2-identity'
+      - 'feature/mvp-s2-browser-qa'
     paths:
       - 'prototype/**'
       - 'tests/**'
       - 'db/**'
       - 'playwright.config.mjs'
+      - 'playwright.mvp.config.mjs'
       - 'package.json'
       - 'src/**'
       - 'scripts/**'
@@ -90,3 +93,34 @@ jobs:
         run: npm run db:migrate:local
       - name: Start local Worker and exercise synthetic API
         run: npm run test:api
+
+
+  mvp-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install development dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install headless Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Create synthetic local demo keys
+        run: npm run dev:setup
+      - name: Migrate disposable local D1
+        run: npm run db:migrate:local
+      - name: Browser E2E through real local Worker API
+        run: npm run test:dev-ui
+      - name: Upload failed browser traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-local-mvp-browser
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
