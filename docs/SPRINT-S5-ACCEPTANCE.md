@@ -69,3 +69,13 @@ CI 验证：https://github.com/sunkai-hit/Health/actions/runs/44203503065
 即使真实测试环境联通也只代表该测试函数可调用，不可据此处理真实病历或宣布正式微信登录已完成。
 
 [ADR-0002](./ADR-0002-S5-CLOUDBASE-BOOTSTRAP.md) · [S5 研发边界](./SPRINT-S5-CLOUDBASE-SCOPE.md) · [云环境创建步骤](../miniapp/CLOUDBASE-SETUP.md)
+
+
+## 2026-11-18 云环境 ID 已提供后的补充联调准备
+
+- 项目方现已提供 CloudBase 环境 ID `health-d2gxjb20h1d33fa91`，并保留原 AppID `wx027f1a9c66e3c01a`。
+- 已在 `miniapp/config/cloud-env.js` 配置该环境的 `enabled:true` 与 `purpose:'synthetic-ping-only'`。这表示**允许 SDK 初始化，并不代表云环境已成功关联或云函数已被部署**。
+- 页面上的 `healthDevPing` 仍然只能通过用户手动点击调用。没有自动云函数请求、没有任何身份信息提取，也没有健康数据写入。
+- 更新了专用自动化检查：SDK 启动不调用云函数，错误环境/错误目的保持禁用，初始化失败不得启用连接按钮，真实云函数响应仍须符合合成数据格式。
+- **尚待真实验收**：项目方在微信开发者工具中将 `healthDevPing` 上传部署至该云环境，并实测小程序手动请求。其关联、地域、收费/配额、后台管理权限均未通过 API 验证。
+- 新配置提交后的 CI 结果见对应 PR #23 的最新 Actions；前述 118/118 是**环境 ID 配置之前的历史验收**，不得将它误写成当前代码版本的全绿结论。
