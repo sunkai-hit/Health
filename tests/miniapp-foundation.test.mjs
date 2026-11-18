@@ -8,8 +8,8 @@ const root='miniapp/';
 const read=(p)=>readFileSync(root+p,'utf8');
 const app=JSON.parse(read('app.json'));
 const project=JSON.parse(read('project.config.json'));
-test('native two-page Mini Program routes have WXML/WXSS/JS/JSON files',()=>{
-  assert.deepEqual(app.pages,['pages/index/index','pages/timeline/timeline']);
+test('native Mini Program routes have WXML/WXSS/JS/JSON files',()=>{
+  assert.deepEqual(app.pages,['pages/index/index','pages/timeline/timeline','pages/dev-cloud/dev-cloud']);
   for(const route of app.pages){
     for(const ext of ['js','wxml','wxss','json']){
       assert.ok(existsSync(root+route+'.'+ext),route+'.'+ext+' missing');

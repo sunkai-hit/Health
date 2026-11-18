@@ -1,12 +1,13 @@
 {
   "compileType": "miniprogram",
   "appid": "wx027f1a9c66e3c01a",
-  "projectname": "Health-S4-synthetic-only",
+  "projectname": "Health-S5-cloudbase-synthetic",
   "setting": {
     "es6": true,
     "enhance": true,
     "postcss": true,
     "urlCheck": true
   },
-  "description": "User-supplied WeChat Mini Program AppID; synthetic read-only shell. This does NOT verify ownership or enable login."
+  "description": "S5 development test: CloudBase environment ID configured for manually triggered synthetic ping only. No login or health record writes.",
+  "cloudfunctionRoot": "cloudfunctions/"
 }

@@ -1,0 +1,8 @@
+{
+  "name": "health-dev-ping",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Synthetic-only CloudBase connectivity probe; no identity or health data",
+  "main": "index.js",
+  "dependencies": {}
+}

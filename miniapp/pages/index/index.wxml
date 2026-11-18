@@ -11,6 +11,7 @@
     <view class="card-title" style="margin-top: 20rpx;">先核验正确的产品形态</view>
     <view class="paragraph">正式版将由微信身份登录、境内服务端授权和健康信息单独同意后提供记录能力；当前所有录入入口保持关闭。</view>
     <button class="primary" bindtap="openTimeline">查看虚构健康事件时间线</button>
+    <button class="primary" bindtap="openCloudDev">云开发连接测试（手动验证）</button>
   </view>
   <view class="card">
     <view class="card-title">已锁定的产品方向</view>
