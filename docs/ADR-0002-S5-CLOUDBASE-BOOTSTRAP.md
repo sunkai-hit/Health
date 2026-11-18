@@ -59,3 +59,10 @@
   https://docs.cloudbase.net/cloud-function/security-rules
 - 微信小程序备案应在微信公众平台办理：
   https://cloud.tencent.cn/document/faq/243/97691
+
+
+## 2026-11-18：CloudBase 测试环境 ID 已提供（实施补充）
+
+项目方提供了测试环境 ID `health-d2gxjb20h1d33fa91`，代码已配置到原生小程序。现阶段允许在开发工具中进行显式合成数据 `healthDevPing` 连接性测试，因此原先“默认关闭、空 ID”的说明只代表前一研发基线。
+
+仍然不能证明环境与 AppID `wx027f1a9c66e3c01a` 已关联、云函数已部署或云开发服务已通过真实验收。小程序 AppID 和 CloudBase 环境 ID 都不是 AppSecret，但安全敏感凭据依旧不能写入客户端。
