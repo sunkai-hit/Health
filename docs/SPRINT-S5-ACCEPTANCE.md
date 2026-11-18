@@ -79,3 +79,19 @@ CI 验证：https://github.com/sunkai-hit/Health/actions/runs/44203503065
 - 更新了专用自动化检查：SDK 启动不调用云函数，错误环境/错误目的保持禁用，初始化失败不得启用连接按钮，真实云函数响应仍须符合合成数据格式。
 - **尚待真实验收**：项目方在微信开发者工具中将 `healthDevPing` 上传部署至该云环境，并实测小程序手动请求。其关联、地域、收费/配额、后台管理权限均未通过 API 验证。
 - 新配置提交后的 CI 结果见对应 PR #23 的最新 Actions；前述 118/118 是**环境 ID 配置之前的历史验收**，不得将它误写成当前代码版本的全绿结论。
+
+
+## 2026-11-18 配置环境 ID 后的实际 CI 复验结论
+
+项目方提供 `health-d2gxjb20h1d33fa91` 后，`miniapp/config/cloud-env.js` 配置为 `enabled:true`、`purpose:'synthetic-ping-only'`。程序启动时只进行 CloudBase SDK 的受控初始化，**仅用户点击测试按钮时才会调用固定云函数**，仍不进行身份读取或健康信息写入。
+
+[GitHub Actions 44207467966](https://github.com/sunkai-hit/Health/actions/runs/44207467966) **7/7 作业全部 success**。按去重的可计数测试项统计：
+- CloudBase 环境与手动探针安全：11/11；
+- 微信 code2Session 备选适配器：14/14；原生小程序静态测试：6/6；
+- S3 OIDC 配置：16/16；默认 Worker 业务路径拒绝：7/7；
+- S2 API：27/27；SQLite：8/8；旧原型浏览器：18/18；本地双账号 Worker 浏览器：12/12；
+- **总计 119/119 项通过**，以及 TypeScript、默认发布 bundle 额外检查成功。
+
+本轮增加了 SDK 初始化失败时禁用手工云连接按钮的负面测试。配置文件只存放环境 ID（非密钥），不存放 AppSecret 或个人信息。
+
+**验收界限：** 这些仍是 GitHub CI 本地/模拟检查，并非云端已部署证明。微信开发者工具登录权限、AppID/环境关联、`healthDevPing` 实际部署、手工真机调用及所在地域/账单仍待项目方验证。本次只关闭“环境 ID 配置及本地自动化回归”这一阶段，**云端联通待验收**。
