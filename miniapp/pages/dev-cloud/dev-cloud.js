@@ -9,6 +9,7 @@ Page({
   onLoad() {
     const app = getApp();
     const ready = cloudSettings.enabled === true &&
+      cloudSettings.purpose === 'synthetic-ping-only' &&
       typeof cloudSettings.envId === 'string' &&
       cloudSettings.envId.length > 0 &&
       app && app.globalData && app.globalData.cloudDemoReady === true;
