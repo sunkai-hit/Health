@@ -8,6 +8,6 @@
     "postcss": true,
     "urlCheck": true
   },
-  "description": "Native WeChat shell; CloudBase test function is disabled until environment binding. No real health data or login.",
+  "description": "S5 development test: CloudBase environment ID configured for manually triggered synthetic ping only. No login or health record writes.",
   "cloudfunctionRoot": "cloudfunctions/"
 }
