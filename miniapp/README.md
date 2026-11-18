@@ -48,3 +48,8 @@ miniapp/
 真正联通需要项目方自行开通并关联 CloudBase 测试环境后**在本地**配置环境 ID，手工部署 \`healthDevPing\`。此测试函数只返回合成状态，不读取 OpenID、不查库、不收集患者数据。具体步骤见 [CLOUDBASE-SETUP.md](./CLOUDBASE-SETUP.md)。
 
 **注意：无需自购服务器/域名不等于无需小程序备案、平台类目及敏感个人信息保护，当前不能处理真实医疗健康资料。**
+
+
+## CloudBase 环境 ID 配置更新（2026-11-18）
+
+S5 测试环境 ID 已配置为 `health-d2gxjb20h1d33fa91`，`cloud-env.js` 已开启**合成数据探针** SDK 初始化。小程序仍不自动发出 CloudBase 函数请求；只有在联调页主动点击测试按钮才调用固定的 `healthDevPing`。实际环境关联/函数部署和真实网络调用未验证，不能因此开放任何健康资料录入。按照 [操作指南](./CLOUDBASE-SETUP.md) 在微信开发者工具部署测试函数后进行手工联通验收。
